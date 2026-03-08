@@ -975,9 +975,70 @@ function importExcel(input) {
 
       let added = 0, skipped = 0;
 
-      // Find header row - search first 10 rows
+      // Detect file format type
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const allRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      // Detect if this is "vertical" format (company name in col D, address in col A)
+      const firstDataRow = allRows[0] || [];
+      const isVerticalFormat = (
+        firstDataRow.length >= 4 &&
+        (firstDataRow[3]?.toString().includes('إسم') || firstDataRow[3]?.toString().includes('اسم') || firstDataRow[3]?.toString().includes('عميل'))
+      );
+
+      if (isVerticalFormat) {
+        // Handle vertical format: each company takes multiple rows
+        // Row pattern: [address, value, type(تليفون/محمول/فاكس/بريد), companyName]
+        let i = 1; // skip header
+        while (i < allRows.length) {
+          const row = allRows[i];
+          const company = (row[3] || '').toString().trim();
+          const address = (row[0] || '').toString().trim();
+          if (!company) { i++; continue; }
+          if (clients.find(c => c.company.trim() === company)) { 
+            // skip all rows for this company
+            i++;
+            while (i < allRows.length && !allRows[i][3]) i++;
+            skipped++; continue; 
+          }
+
+          let phone = '', mobile = '', email = '';
+          // Current row
+          const type0 = (row[2] || '').toString().trim();
+          const val0 = (row[1] || '').toString().trim();
+          if (type0 === 'تليفون') phone = val0;
+          else if (type0 === 'محمول') mobile = val0;
+          else if (type0 === 'بريد إلكترونى') email = val0;
+
+          // Read next rows until new company
+          i++;
+          while (i < allRows.length && !allRows[i][3]) {
+            const t = (allRows[i][2] || '').toString().trim();
+            const v = (allRows[i][1] || '').toString().trim();
+            if (t === 'محمول') mobile = v;
+            else if (t === 'تليفون' && !phone) phone = v;
+            else if (t === 'بريد إلكترونى') email = v;
+            i++;
+          }
+
+          clients.push({
+            id: Date.now() + Math.random(),
+            company,
+            industry: 'أخرى',
+            region: extractRegion(address) || 'غير محدد',
+            address,
+            engineer: 'غير محدد',
+            phone: mobile || phone || 'غير محدد',
+            whatsapp: '',
+            email,
+            notes: '',
+            createdAt: new Date().toLocaleDateString('ar-EG'),
+            history: []
+          });
+          added++;
+        }
+      } else {
       
       // Find the header row index
       let headerRowIdx = 0;
@@ -1064,6 +1125,7 @@ function importExcel(input) {
         });
         added++;
       });
+      } // end else (standard format)
 
       saveData();
       renderClients();
