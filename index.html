@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Belzona CRM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -502,6 +504,10 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
           <span style="color:var(--muted)">🔍</span>
           <input type="text" id="searchInput" placeholder="ابحث..." oninput="renderClients()">
         </div>
+        <label class="btn-add" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);cursor:pointer;" title="استيراد من Excel">
+          📥 استيراد Excel
+          <input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)">
+        </label>
         <button class="btn-add" onclick="openAddModal()">＋ عميل جديد</button>
       </div>
     </div>
@@ -953,6 +959,69 @@ function deleteClient(idx) {
   closeModal('detailModal');
   renderClients();
   showToast('🗑️ تم حذف العميل', 'success');
+}
+
+// ===== EXCEL IMPORT =====
+function importExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      let added = 0, skipped = 0;
+
+      rows.forEach(row => {
+        // Map columns flexibly
+        const company = (row['Company Name'] || row['company name'] || row['اسم الشركة'] || row['الشركة'] || '').toString().trim();
+        if (!company) { skipped++; return; }
+
+        // Check duplicate
+        if (clients.find(c => c.company === company)) { skipped++; return; }
+
+        const phone = (row['mobile'] || row['Mobile'] || row['Telephone'] || row['telephone'] || row['تليفون'] || row['موبايل'] || '').toString().trim();
+        const email = (row['E-mail'] || row['email'] || row['Email'] || row['الإيميل'] || '').toString().trim();
+        const address = (row['address'] || row['Address'] || row['العنوان'] || '').toString().trim();
+        const contact = (row['Contact Name'] || row['contact name'] || row['اسم المسؤول'] || '').toString().trim();
+        const region = extractRegion(address);
+
+        clients.push({
+          id: Date.now() + Math.random(),
+          company,
+          industry: 'أخرى',
+          region: region || 'غير محدد',
+          address,
+          engineer: contact || 'غير محدد',
+          phone: phone || 'غير محدد',
+          whatsapp: '',
+          email,
+          notes: '',
+          createdAt: new Date().toLocaleDateString('ar-EG'),
+          history: []
+        });
+        added++;
+      });
+
+      saveData();
+      renderClients();
+      input.value = '';
+      showToast(`✅ تم استيراد ${added} عميل — تم تخطي ${skipped}`, 'success');
+    } catch(err) {
+      showToast('❌ خطأ في قراءة الملف', 'error');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function extractRegion(address) {
+  const regions = ['القاهرة','الإسكندرية','السويس','الإسماعيلية','بورسعيد','الغربية','الشرقية','أسيوط','أسوان','الجيزة','السادس من اكتوبر','أكتوبر','العاشر من رمضان','العبور','بدر','المنصورة','الزقازيق','طنطا','دمياط'];
+  for (let r of regions) {
+    if (address && address.includes(r)) return r;
+  }
+  return '';
 }
 
 // ===== UTILS =====
