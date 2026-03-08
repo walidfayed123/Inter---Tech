@@ -1,4 +1,4 @@
- 
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -972,10 +972,32 @@ function importExcel(input) {
   reader.onload = function(e) {
     try {
       const wb = XLSX.read(e.target.result, { type: 'binary' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
       let added = 0, skipped = 0;
+
+      // Find header row - search first 10 rows
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const allRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      
+      // Find the header row index
+      let headerRowIdx = 0;
+      const companyKeywords = ['company name', 'الشركة', 'اسم الشركة', 'company'];
+      for (let i = 0; i < Math.min(10, allRows.length); i++) {
+        const rowStr = allRows[i].join('|').toLowerCase();
+        if (companyKeywords.some(k => rowStr.includes(k))) {
+          headerRowIdx = i;
+          break;
+        }
+      }
+
+      // Build rows with correct header
+      const headers = allRows[headerRowIdx];
+      const rows = [];
+      for (let i = headerRowIdx + 1; i < allRows.length; i++) {
+        const rowObj = {};
+        headers.forEach((h, j) => { rowObj[h] = allRows[i][j]; });
+        rows.push(rowObj);
+      }
 
       let lastCompany = null;
       let lastAddress = null;
