@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -977,26 +977,61 @@ function importExcel(input) {
 
       let added = 0, skipped = 0;
 
+      let lastCompany = null;
+      let lastAddress = null;
+
       rows.forEach(row => {
-        // Map columns flexibly
-        const company = (row['Company Name'] || row['company name'] || row['اسم الشركة'] || row['الشركة'] || '').toString().trim();
+        // Support both English and Arabic column names
+        const company = (
+          row['Company Name'] || row['company name'] ||
+          row['اسم الشركة'] || row['الشركة'] || row['شركة'] || ''
+        ).toString().trim();
+
+        const address = (
+          row['address'] || row['Address'] ||
+          row['العنوان'] || row['عنوان'] || ''
+        ).toString().trim();
+
+        const contact = (
+          row['Contact Name'] || row['contact name'] ||
+          row['اسم الشخص  '] || row['اسم الشخص'] || row['اسم المسؤول'] ||
+          row['الاسم'] || ''
+        ).toString().trim();
+
+        const phone = (
+          row['mobile'] || row['Mobile'] || row['Mob '] || row['Mob'] ||
+          row['Telephone'] || row['telephone'] || row['Tel '] || row['Tel'] ||
+          row['تليفون'] || row['موبايل'] || ''
+        ).toString().trim();
+
+        const email = (
+          row['E-mail'] || row['email'] || row['Email'] || row['e-mail'] ||
+          row['الإيميل'] || ''
+        ).toString().trim();
+
+        // Use last known company if current row has no company (multi-contact rows)
+        const effectiveCompany = company || lastCompany;
+        const effectiveAddress = address || lastAddress;
+
+        if (!effectiveCompany) { skipped++; return; }
+
+        // Update last known company
+        if (company) { lastCompany = company; lastAddress = address; }
+
+        // Only add once per company (first occurrence)
         if (!company) { skipped++; return; }
 
         // Check duplicate
-        if (clients.find(c => c.company === company)) { skipped++; return; }
+        if (clients.find(c => c.company.trim() === effectiveCompany.trim())) { skipped++; return; }
 
-        const phone = (row['mobile'] || row['Mobile'] || row['Telephone'] || row['telephone'] || row['تليفون'] || row['موبايل'] || '').toString().trim();
-        const email = (row['E-mail'] || row['email'] || row['Email'] || row['الإيميل'] || '').toString().trim();
-        const address = (row['address'] || row['Address'] || row['العنوان'] || '').toString().trim();
-        const contact = (row['Contact Name'] || row['contact name'] || row['اسم المسؤول'] || '').toString().trim();
-        const region = extractRegion(address);
+        const region = extractRegion(effectiveAddress);
 
         clients.push({
           id: Date.now() + Math.random(),
-          company,
+          company: effectiveCompany,
           industry: 'أخرى',
           region: region || 'غير محدد',
-          address,
+          address: effectiveAddress,
           engineer: contact || 'غير محدد',
           phone: phone || 'غير محدد',
           whatsapp: '',
