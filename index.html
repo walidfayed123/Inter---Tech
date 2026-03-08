@@ -508,6 +508,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
           📥 استيراد Excel
           <input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)">
         </label>
+        <button class="btn-add" style="background:var(--bg3);border:1px solid var(--border);color:var(--text)" onclick="loadFromSheet()">🔄 تزامن</button>
         <button class="btn-add" onclick="openAddModal()">＋ عميل جديد</button>
       </div>
     </div>
@@ -612,6 +613,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 
 <script>
 // ===== STATE =====
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzYkuBjtIIKQsA4EjSELIac_YMbEPK0Z_HzOveyx6mUu_xYffVh-nPXP2gfdsPFDpNu/exec';
 let clients = JSON.parse(localStorage.getItem('bz_clients') || '[]');
 let currentUser = JSON.parse(localStorage.getItem('bz_user') || 'null');
 let currentView = 'grid';
@@ -664,6 +666,7 @@ function showApp() {
   document.getElementById('userRole').textContent = currentUser.role;
   document.getElementById('userAvatar').textContent = currentUser.name[0];
   renderClients();
+  loadFromSheet();
 }
 
 // ===== NAV =====
@@ -1027,6 +1030,29 @@ function extractRegion(address) {
 // ===== UTILS =====
 function saveData() {
   localStorage.setItem('bz_clients', JSON.stringify(clients));
+  fetch(SHEET_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'save', clients: clients })
+  }).catch(() => {});
+}
+
+async function loadFromSheet() {
+  try {
+    showToast('⏳ جاري تحميل البيانات...', 'success');
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'load' })
+    });
+    const data = await res.json();
+    if (data.status === 'ok' && data.clients.length > 0) {
+      clients = data.clients;
+      localStorage.setItem('bz_clients', JSON.stringify(clients));
+      renderClients();
+      showToast(`✅ تم تحميل ${clients.length} عميل من Google Sheets`, 'success');
+    }
+  } catch(e) {
+    showToast('⚠️ تعذر الاتصال بـ Google Sheets', 'error');
+  }
 }
 
 function openModal(id) {
