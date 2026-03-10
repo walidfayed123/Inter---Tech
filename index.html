@@ -182,6 +182,16 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .bar-track{flex:1;background:var(--bg3);border-radius:4px;height:8px;}
 .bar-fill{height:8px;border-radius:4px;background:var(--red);transition:width 0.5s;}
 .bar-count{font-size:11px;color:var(--muted);width:30px;}
+.contacts-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px;}
+.contacts-table th{background:var(--bg3);color:var(--muted);padding:8px 10px;text-align:right;font-weight:700;font-size:11px;border-bottom:1px solid var(--border);}
+.contacts-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.contacts-table tr:hover td{background:rgba(255,255,255,0.02);}
+.contacts-table .contact-actions{display:flex;gap:4px;}
+.contacts-table .cb{padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:14px;transition:all 0.15s;}
+.contacts-table .cb:hover{background:rgba(255,255,255,0.05);color:var(--text);}
+.add-contact-row{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.5fr 1.5fr auto;gap:6px;margin-top:10px;align-items:center;}
+.add-contact-row input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;}
+.add-contact-row input:focus{border-color:rgba(200,16,46,0.5);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 22px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 8px 30px rgba(0,0,0,0.4);display:flex;align-items:center;gap:8px;}
 .toast.show{opacity:1;}
 .toast.success{border-color:rgba(0,200,150,0.4);}
@@ -316,13 +326,22 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
         </div>
       </div>
       <div class="ig"><label>العنوان</label><input type="text" id="f_address" placeholder="المنطقة الصناعية..."></div>
-      <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px;font-size:12px;color:var(--muted);font-weight:700">بيانات المهندس المسؤول</div>
-      <div class="ig"><label>اسم المهندس *</label><input type="text" id="f_engineer" placeholder="م. خالد عبدالله"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="ig"><label>الموبايل *</label><input type="tel" id="f_phone" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
-        <div class="ig"><label>واتساب</label><input type="tel" id="f_whatsapp" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
+      <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px;font-size:12px;color:var(--muted);font-weight:700">جهات الاتصال (حتى 7 أشخاص)</div>
+      <div id="f_contacts_list"></div>
+      <div class="add-contact-row" style="margin-top:8px">
+        <input type="text" id="fc_name" placeholder="الاسم *">
+        <input type="text" id="fc_dept" placeholder="القسم">
+        <input type="text" id="fc_title" placeholder="المنصب">
+        <input type="tel" id="fc_phone" placeholder="الموبايل" style="direction:ltr">
+        <input type="email" id="fc_email" placeholder="الإيميل" style="direction:ltr">
+        <button class="btn-save" style="padding:7px 12px;white-space:nowrap" onclick="addContactRow('f')">+ إضافة</button>
       </div>
-      <div class="ig"><label>الإيميل</label><input type="email" id="f_email" placeholder="example@co.com" style="direction:ltr;text-align:right"></div>
+      <div style="display:none">
+        <input type="hidden" id="f_engineer" value="placeholder">
+        <input type="hidden" id="f_phone" value="placeholder">
+        <input type="hidden" id="f_whatsapp" value="">
+        <input type="hidden" id="f_email" value="">
+      </div>
       <div class="ig"><label>ملاحظات</label><textarea id="f_notes" placeholder="أي ملاحظات..."></textarea></div>
     </div>
     <div class="mf"><button class="btn-cancel" onclick="closeModal('addModal')">إلغاء</button><button class="btn-save" onclick="saveClient()">💾 حفظ</button></div>
@@ -422,13 +441,22 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
         </div>
       </div>
       <div class="ig"><label>العنوان</label><input type="text" id="e_address" placeholder="المنطقة الصناعية..."></div>
-      <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px;font-size:12px;color:var(--muted);font-weight:700">بيانات المهندس المسؤول</div>
-      <div class="ig"><label>اسم المهندس *</label><input type="text" id="e_engineer" placeholder="م. خالد عبدالله"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="ig"><label>الموبايل *</label><input type="tel" id="e_phone" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
-        <div class="ig"><label>واتساب</label><input type="tel" id="e_whatsapp" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
+      <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px;font-size:12px;color:var(--muted);font-weight:700">جهات الاتصال (حتى 7 أشخاص)</div>
+      <div id="e_contacts_list"></div>
+      <div class="add-contact-row" style="margin-top:8px">
+        <input type="text" id="ec_name" placeholder="الاسم *">
+        <input type="text" id="ec_dept" placeholder="القسم">
+        <input type="text" id="ec_title" placeholder="المنصب">
+        <input type="tel" id="ec_phone" placeholder="الموبايل" style="direction:ltr">
+        <input type="email" id="ec_email" placeholder="الإيميل" style="direction:ltr">
+        <button class="btn-save" style="padding:7px 12px;white-space:nowrap" onclick="addContactRow('e')">+ إضافة</button>
       </div>
-      <div class="ig"><label>الإيميل</label><input type="email" id="e_email" placeholder="example@co.com" style="direction:ltr;text-align:right"></div>
+      <div style="display:none">
+        <input type="hidden" id="e_engineer" value="placeholder">
+        <input type="hidden" id="e_phone" value="placeholder">
+        <input type="hidden" id="e_whatsapp" value="">
+        <input type="hidden" id="e_email" value="">
+      </div>
       <div class="ig"><label>ملاحظات</label><textarea id="e_notes" placeholder="أي ملاحظات..."></textarea></div>
     </div>
     <div class="mf"><button class="btn-cancel" onclick="closeModal('editModal')">إلغاء</button><button class="btn-save" onclick="updateClient()">💾 حفظ التعديلات</button></div>
@@ -741,14 +769,13 @@ async function openDetail(id){
         <button class="d-btn" style="background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)" onclick="openEditModal('${c.id}')">✏️<span>تعديل</span></button>
       </div>
       <div class="ig-grid">
-        <div class="ii"><div class="il">المهندس</div><div class="iv">👷 ${c.engineer||'—'}</div></div>
-        <div class="ii"><div class="il">الموبايل</div><div class="iv" style="direction:ltr;text-align:right">${c.phone||'—'}</div></div>
-        <div class="ii" style="grid-column:1/-1"><div class="il">المندوب المسؤول</div><div class="iv" style="color:var(--green)">👤 ${repName}</div></div>
-        ${c.email?`<div class="ii"><div class="il">الإيميل</div><div class="iv" style="direction:ltr;text-align:right;font-size:11px">${c.email}</div></div>`:''}
         <div class="ii"><div class="il">تاريخ الإضافة</div><div class="iv">${new Date(c.created_at).toLocaleDateString('ar-EG')}</div></div>
+        <div class="ii"><div class="il">المندوب المسؤول</div><div class="iv" style="color:var(--green)">👤 ${repName}</div></div>
         ${c.address?`<div class="ii" style="grid-column:1/-1"><div class="il">العنوان</div><div class="iv">📍 ${c.address}</div></div>`:''}
         ${c.notes?`<div class="ii" style="grid-column:1/-1"><div class="il">ملاحظات</div><div class="iv" style="font-weight:400">${c.notes}</div></div>`:''}
       </div>
+      <div class="sec-title">👥 جهات الاتصال</div>
+      ${(()=>{let cts=[];try{cts=c.contacts?JSON.parse(c.contacts):[];}catch(e){}if(!cts.length&&c.engineer&&c.engineer!=='غير محدد')cts=[{name:c.engineer,dept:'',title:'',phone:c.phone||'',email:c.email||''}];if(!cts.length)return'<div style="color:var(--muted);font-size:12px;padding:8px 0">لا يوجد جهات اتصال</div>';return`<table class="contacts-table"><tr><th>الاسم</th><th>القسم</th><th>المنصب</th><th>الموبايل</th><th>الإيميل</th><th>تواصل</th></tr>${cts.map(ct=>`<tr><td><strong>${ct.name||'—'}</strong></td><td>${ct.dept||'—'}</td><td>${ct.title||'—'}</td><td style="direction:ltr">${ct.phone||'—'}</td><td style="direction:ltr;font-size:11px">${ct.email||'—'}</td><td><div class="contact-actions">${ct.phone?`<button class="cb" onclick="call('${ct.phone}')">📞</button>`:''} ${ct.phone?`<button class="cb" onclick="wa('${ct.phone}','${c.company}')">💬</button>`:''} ${ct.email?`<button class="cb" onclick="sendMail('${ct.email}','${c.company}')">📧</button>`:''}</div></td></tr>`).join('')}</table>`})()}
       <div class="map-embed" onclick="omap('${c.address||c.region||''}')"><span style="font-size:36px;opacity:0.5">🗺️</span><div>فتح على Google Maps</div><div style="font-size:11px">📍 ${c.address||c.region||'—'}</div></div>
       <div class="sec-title">سجل التعاملات (${history.length})</div>
       <div class="hl">${hhtml}</div>
@@ -789,7 +816,8 @@ async function delClient(id){
 }
 
 function openAddModal(){
-  ['f_company','f_engineer','f_phone','f_whatsapp','f_email','f_address','f_notes'].forEach(id=>document.getElementById(id).value='');
+  ['f_company','f_address','f_notes'].forEach(id=>document.getElementById(id).value='');
+  fContacts=[];renderContactsList('f');
   document.getElementById('f_industry').value='';
   document.getElementById('f_region').value='';
   if(CU.role==='مندوب مبيعات'&&CU.region)document.getElementById('f_region').value=CU.region;
@@ -948,11 +976,14 @@ function openEditModal(id){
   document.getElementById('e_industry').value=c.industry||'';
   document.getElementById('e_region').value=c.region||'';
   document.getElementById('e_address').value=c.address||'';
-  document.getElementById('e_engineer').value=c.engineer||'';
-  document.getElementById('e_phone').value=c.phone||'';
-  document.getElementById('e_whatsapp').value=c.whatsapp||'';
-  document.getElementById('e_email').value=c.email||'';
   document.getElementById('e_notes').value=c.notes||'';
+  // Load contacts
+  try{eContacts=c.contacts?JSON.parse(c.contacts):[];}catch(e){eContacts=[];}
+  // If no contacts array but has old engineer data, migrate it
+  if(!eContacts.length&&c.engineer&&c.engineer!=='غير محدد'){
+    eContacts=[{name:c.engineer,dept:'',title:'',phone:c.phone||'',email:c.email||''}];
+  }
+  renderContactsList('e');
   closeModal('detailModal');
   openModal('editModal');
 }
@@ -961,11 +992,19 @@ async function updateClient(){
   const company=document.getElementById('e_company').value.trim();
   const industry=document.getElementById('e_industry').value;
   const region=document.getElementById('e_region').value;
-  const engineer=document.getElementById('e_engineer').value.trim();
-  const phone=document.getElementById('e_phone').value.trim();
-  if(!company||!industry||!region||!engineer||!phone){showToast('❌ اكمل الحقول المطلوبة *','error');return;}
+  if(!company||!industry||!region){showToast('❌ اكمل الحقول المطلوبة *','error');return;}
+  if(!eContacts.length){showToast('❌ أضف جهة اتصال واحدة على الأقل','error');return;}
+  const firstContact=eContacts[0];
   try{
-    await sb(`clients?id=eq.${editingId}`,{method:'PATCH',body:JSON.stringify({company,industry,region,address:document.getElementById('e_address').value.trim(),engineer,phone,whatsapp:document.getElementById('e_whatsapp').value.trim(),email:document.getElementById('e_email').value.trim(),notes:document.getElementById('e_notes').value.trim()})});
+    await sb(`clients?id=eq.${editingId}`,{method:'PATCH',body:JSON.stringify({
+      company,industry,region,
+      address:document.getElementById('e_address').value.trim(),
+      engineer:firstContact.name,
+      phone:firstContact.phone||'غير محدد',
+      email:firstContact.email||'',
+      contacts:JSON.stringify(eContacts),
+      notes:document.getElementById('e_notes').value.trim()
+    })});
     closeModal('editModal');showToast('✅ تم تعديل بيانات العميل','success');loadClients();
   }catch(e){console.error(e);showToast('❌ خطأ في الحفظ','error');}
 }
@@ -1155,6 +1194,51 @@ function renderStats(){
           </div>`).join('')}
       </div>
     </div>`;
+}
+
+// Contacts management
+let fContacts = []; // for add modal
+let eContacts = []; // for edit modal
+
+function addContactRow(prefix){
+  const name = document.getElementById(prefix+'c_name').value.trim();
+  const dept = document.getElementById(prefix+'c_dept').value.trim();
+  const title = document.getElementById(prefix+'c_title').value.trim();
+  const phone = document.getElementById(prefix+'c_phone').value.trim();
+  const email = document.getElementById(prefix+'c_email').value.trim();
+  if(!name){showToast('❌ اكتب اسم جهة الاتصال','error');return;}
+  const arr = prefix==='f'?fContacts:eContacts;
+  if(arr.length>=7){showToast('❌ الحد الأقصى 7 جهات اتصال','error');return;}
+  arr.push({name,dept,title,phone,email});
+  renderContactsList(prefix);
+  ['c_name','c_dept','c_title','c_phone','c_email'].forEach(f=>document.getElementById(prefix+f).value='');
+}
+
+function removeContact(prefix, idx){
+  const arr = prefix==='f'?fContacts:eContacts;
+  arr.splice(idx,1);
+  renderContactsList(prefix);
+}
+
+function renderContactsList(prefix){
+  const arr = prefix==='f'?fContacts:eContacts;
+  const con = document.getElementById(prefix+'_contacts_list');
+  if(!arr.length){con.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">لا يوجد جهات اتصال - أضف أول جهة أدناه</div>';return;}
+  con.innerHTML=`<table class="contacts-table">
+    <tr><th>الاسم</th><th>القسم</th><th>المنصب</th><th>الموبايل</th><th>الإيميل</th><th></th></tr>
+    ${arr.map((c,i)=>`<tr>
+      <td><strong>${c.name}</strong></td>
+      <td>${c.dept||'—'}</td>
+      <td>${c.title||'—'}</td>
+      <td style="direction:ltr">${c.phone||'—'}</td>
+      <td style="direction:ltr;font-size:11px">${c.email||'—'}</td>
+      <td><div class="contact-actions">
+        ${c.phone?`<button class="cb" onclick="call('${c.phone}')">📞</button>`:''}
+        ${c.email?`<button class="cb" onclick="sendMail('${c.email}','')">📧</button>`:''}
+        <button class="cb" style="color:var(--red)" onclick="removeContact('${prefix}',${i})">🗑️</button>
+      </div></td>
+    </tr>`).join('')}
+  </table>`;
 }
 
 function exReg(addr){const rs=['القاهرة','الجيزة','الإسكندرية','الدقهلية','البحر الأحمر','البحيرة','الفيوم','الغربية','الإسماعيلية','المنوفية','المنيا','القليوبية','الوادي الجديد','السويس','أسوان','أسيوط','بني سويف','بورسعيد','دمياط','الشرقية','جنوب سيناء','كفر الشيخ','مطروح','الأقصر','قنا','شمال سيناء','سوهاج','السادس من أكتوبر','العاشر من رمضان'];for(let r of rs){if(addr&&addr.includes(r))return r;}return '';}
