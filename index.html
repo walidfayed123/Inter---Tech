@@ -243,10 +243,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       <div class="ig"><label>اسم المصنع / الشركة *</label><input type="text" id="f_company" placeholder="مثال: أرامكو مصر"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="ig"><label>نوع الصناعة *</label>
-          <select id="f_industry"><option value="">اختر...</option><option value="بترول">🛢️ بترول</option><option value="غذاء">🌾 غذاء</option><option value="أسمنت">🏗️ أسمنت</option><option value="كيماويات">⚗️ كيماويات</option><option value="مياه">💧 مياه</option><option value="حديد وصلب">🔩 حديد وصلب</option><option value="أخرى">📦 أخرى</option></select>
+          <select id="f_industry"><option value="">اختر...</option><option value="Oil and Gas">🛢️ Oil and Gas</option><option value="Petrochemical">⚗️ Petrochemical</option><option value="Marine">⚓ Marine</option><option value="Water and Waste Water">💧 Water and Waste Water</option><option value="Paper">📄 Paper</option><option value="Facilities HVAC">🌡️ Facilities HVAC</option><option value="Power Generation">⚡ Power Generation</option><option value="Renewable Energy">♻️ Renewable Energy</option><option value="Mining">⛏️ Mining</option><option value="Steel">🔩 Steel</option><option value="Cement">🏗️ Cement</option><option value="Food and Pharmaceutical">🌾 Food and Pharmaceutical</option><option value="Sugar">🍬 Sugar</option><option value="Military">🎖️ Military</option><option value="Aviation">✈️ Aviation</option><option value="Heavy Equipment">🚜 Heavy Equipment</option><option value="Consultants">💼 Consultants</option><option value="General Industry">🏭 General Industry</option><option value="Contractors">🔧 Contractors</option><option value="OEM">⚙️ OEM</option></select>
         </div>
         <div class="ig"><label>المنطقة *</label>
-          <select id="f_region"><option value="">اختر...</option><option>القاهرة</option><option>الإسكندرية</option><option>السويس</option><option>الإسماعيلية</option><option>بورسعيد</option><option>الغربية</option><option>الشرقية</option><option>أسيوط</option><option>أسوان</option><option>الجيزة</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option><option>أخرى</option></select>
+          <select id="f_region"><option value="">اختر...</option><option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option><option>أخرى</option></select>
         </div>
       </div>
       <div class="ig"><label>العنوان</label><input type="text" id="f_address" placeholder="المنطقة الصناعية..."></div>
@@ -283,7 +283,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
           </select>
         </div>
         <div class="ig" id="u_region_group"><label>المنطقة</label>
-          <select id="u_region"><option value="">كل المناطق</option><option>القاهرة</option><option>الإسكندرية</option><option>السويس</option><option>الإسماعيلية</option><option>بورسعيد</option><option>الغربية</option><option>الشرقية</option><option>أسيوط</option><option>أسوان</option><option>الجيزة</option><option>السادس من أكتوبر</option></select>
+          <select id="u_region"><option value="">كل المناطق</option><option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option></select>
         </div>
       </div>
     </div>
@@ -311,10 +311,26 @@ let CU=JSON.parse(localStorage.getItem('bz_u3')||'null');
 let clients=[],allUsers=[],currentView='grid';
 
 const IND={
-  'بترول':{cls:'ind-petroleum',icon:'🛢️'},
-  'غذاء':{cls:'ind-food',icon:'🌾'},
-  'أسمنت':{cls:'ind-cement',icon:'🏗️'},
-  'كيماويات':{cls:'ind-chemical',icon:'⚗️'},
+  'Oil and Gas':{cls:'ind-petroleum',icon:'🛢️'},
+  'Petrochemical':{cls:'ind-chemical',icon:'⚗️'},
+  'Marine':{cls:'ind-water',icon:'⚓'},
+  'Water and Waste Water':{cls:'ind-water',icon:'💧'},
+  'Paper':{cls:'ind-other',icon:'📄'},
+  'Facilities HVAC':{cls:'ind-other',icon:'🌡️'},
+  'Power Generation':{cls:'ind-other',icon:'⚡'},
+  'Renewable Energy':{cls:'ind-other',icon:'♻️'},
+  'Mining':{cls:'ind-other',icon:'⛏️'},
+  'Steel':{cls:'ind-steel',icon:'🔩'},
+  'Cement':{cls:'ind-cement',icon:'🏗️'},
+  'Food and Pharmaceutical':{cls:'ind-food',icon:'🌾'},
+  'Sugar':{cls:'ind-food',icon:'🍬'},
+  'Military':{cls:'ind-other',icon:'🎖️'},
+  'Aviation':{cls:'ind-other',icon:'✈️'},
+  'Heavy Equipment':{cls:'ind-other',icon:'🚜'},
+  'Consultants':{cls:'ind-other',icon:'💼'},
+  'General Industry':{cls:'ind-other',icon:'🏭'},
+  'Contractors':{cls:'ind-other',icon:'🔧'},
+  'OEM':{cls:'ind-other',icon:'⚙️'},
   'مياه':{cls:'ind-water',icon:'💧'},
   'حديد وصلب':{cls:'ind-steel',icon:'🔩'},
   'أخرى':{cls:'ind-other',icon:'📦'},
@@ -645,7 +661,7 @@ function importExcel(input){
   reader.readAsBinaryString(file);
 }
 
-function exReg(addr){const rs=['القاهرة','الإسكندرية','السويس','الإسماعيلية','بورسعيد','الغربية','الشرقية','أسيوط','أسوان','الجيزة','السادس من اكتوبر','أكتوبر','العاشر من رمضان','العبور','بدر','المنصورة','الزقازيق','طنطا','دمياط'];for(let r of rs){if(addr&&addr.includes(r))return r;}return '';}
+function exReg(addr){const rs=['القاهرة','الجيزة','الإسكندرية','الدقهلية','البحر الأحمر','البحيرة','الفيوم','الغربية','الإسماعيلية','المنوفية','المنيا','القليوبية','الوادي الجديد','السويس','أسوان','أسيوط','بني سويف','بورسعيد','دمياط','الشرقية','جنوب سيناء','كفر الشيخ','مطروح','الأقصر','قنا','شمال سيناء','سوهاج','السادس من أكتوبر','العاشر من رمضان'];for(let r of rs){if(addr&&addr.includes(r))return r;}return '';}
 
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
