@@ -916,7 +916,15 @@ async function runImport(){
       const wb=XLSX.read(e.target.result,{type:'binary'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      const names=rows.map(r=>r[0]?.toString().trim()).filter(Boolean);
+      // Find which column has company names - look for 'company' header or use col with most non-numeric values
+      let companyCol=0;
+      const headerRow=rows.find(r=>r.some(c=>c?.toString().toLowerCase().includes('company')||c?.toString().includes('الشركة')));
+      if(headerRow){
+        const idx=headerRow.findIndex(c=>c?.toString().toLowerCase().includes('company')||c?.toString().includes('الشركة'));
+        if(idx>=0)companyCol=idx;
+      }
+      const dataRows=rows.filter(r=>r[companyCol]&&isNaN(r[companyCol]));
+      const names=dataRows.map(r=>r[companyCol]?.toString().trim()).filter(Boolean);
       if(!names.length){showToast('❌ الملف فاضي','error');return;}
       
       if(mode==='update'){
