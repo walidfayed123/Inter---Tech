@@ -993,16 +993,15 @@ async function updateClient(){
   const industry=document.getElementById('e_industry').value;
   const region=document.getElementById('e_region').value;
   if(!company||!industry||!region){showToast('❌ اكمل الحقول المطلوبة *','error');return;}
-  if(!eContacts.length){showToast('❌ أضف جهة اتصال واحدة على الأقل','error');return;}
-  const firstContact=eContacts[0];
+  const firstContact=eContacts[0]||null;
   try{
     await sb(`clients?id=eq.${editingId}`,{method:'PATCH',body:JSON.stringify({
       company,industry,region,
       address:document.getElementById('e_address').value.trim(),
-      engineer:firstContact.name,
-      phone:firstContact.phone||'غير محدد',
-      email:firstContact.email||'',
-      contacts:JSON.stringify(eContacts),
+      engineer:firstContact?firstContact.name:'غير محدد',
+      phone:firstContact?firstContact.phone||'غير محدد':'غير محدد',
+      email:firstContact?firstContact.email||'':'',
+      contacts:eContacts.length?JSON.stringify(eContacts):null,
       notes:document.getElementById('e_notes').value.trim()
     })});
     closeModal('editModal');showToast('✅ تم تعديل بيانات العميل','success');loadClients();
