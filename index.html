@@ -91,6 +91,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .ab.call:hover{background:rgba(59,130,246,0.1);color:var(--blue);border-color:rgba(59,130,246,0.3);}
 .ab.map:hover{background:rgba(244,163,0,0.1);color:var(--gold);border-color:rgba(244,163,0,0.3);}
 .ab.hist:hover{background:rgba(200,16,46,0.1);color:var(--red);border-color:rgba(200,16,46,0.3);}
+.ab.mail:hover{background:rgba(244,163,0,0.1);color:var(--gold);border-color:rgba(244,163,0,0.3);}
 .clients-list{display:flex;flex-direction:column;gap:8px;}
 .li{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr auto;gap:12px;align-items:center;cursor:pointer;transition:all 0.15s;}
 .li:hover{border-color:rgba(200,16,46,0.2);background:rgba(200,16,46,0.03);}
@@ -170,6 +171,17 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .cb-client{width:16px;height:16px;cursor:pointer;accent-color:var(--red);}
 .client-card.selected{border-color:rgba(200,16,46,0.5);background:rgba(200,16,46,0.05);}
 
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center;}
+.stat-num{font-size:36px;font-weight:900;color:var(--red);}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600;}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;}
+.chart-title{font-size:14px;font-weight:800;margin-bottom:16px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.bar-label{font-size:12px;color:var(--muted);width:160px;text-align:right;flex-shrink:0;}
+.bar-track{flex:1;background:var(--bg3);border-radius:4px;height:8px;}
+.bar-fill{height:8px;border-radius:4px;background:var(--red);transition:width 0.5s;}
+.bar-count{font-size:11px;color:var(--muted);width:30px;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 22px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 8px 30px rgba(0,0,0,0.4);display:flex;align-items:center;gap:8px;}
 .toast.show{opacity:1;}
 .toast.success{border-color:rgba(0,200,150,0.4);}
@@ -208,6 +220,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       <div class="nav-sec">القائمة الرئيسية</div>
       <div class="nav-item active" onclick="showPage('clients',this)"><span class="ni">🏭</span> العملاء <span class="nav-badge" id="clientsBadge">0</span></div>
       <div class="nav-item" onclick="showPage('history',this)"><span class="ni">📋</span> سجل التعاملات</div>
+      <div class="nav-item" id="navStats" style="display:none" onclick="showPage('stats',this)"><span class="ni">📊</span> الإحصائيات</div>
       <div class="nav-item" id="navUsers" style="display:none" onclick="showPage('users',this)"><span class="ni">👥</span> المستخدمين</div>
     </nav>
     <div class="sb-user">
@@ -223,6 +236,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       <div class="topbar-right">
         <div class="sw"><span style="color:var(--muted)">🔍</span><input type="text" id="searchInput" placeholder="ابحث..." oninput="renderClients()"></div>
         <button class="btn-sec" id="importBtn" style="display:none" onclick="openImportModal()">📥 استيراد Excel</button>
+        <button class="btn-sec" id="exportBtn" style="display:none" onclick="openExportModal()">📤 تصدير Excel</button>
         <button class="btn-sec" id="assignBtn" style="display:none" onclick="toggleAssignMode()">🎯 توزيع جماعي</button>
         <button class="btn-add" id="addClientBtn" onclick="openAddModal()">＋ عميل جديد</button>
       </div>
@@ -233,7 +247,21 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
           <div class="view-tab active" onclick="setView('grid',this)">⊞ بطاقات</div>
           <div class="view-tab" onclick="setView('list',this)">☰ قائمة</div>
         </div>
-        <div id="filterBar" class="filter-bar" style="display:none">
+        <div id="advSearchBar" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+  <select id="asRegion" onchange="renderClients()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;">
+    <option value="">🗺️ كل المناطق</option>
+    <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option>
+  </select>
+  <select id="asIndustry" onchange="renderClients()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;">
+    <option value="">🏭 كل القطاعات</option>
+    <option>Oil and Gas</option><option>Petrochemical</option><option>Marine</option><option>Water and Waste Water</option><option>Paper</option><option>Facilities HVAC</option><option>Power Generation</option><option>Renewable Energy</option><option>Mining</option><option>Steel</option><option>Cement</option><option>Food and Pharmaceutical</option><option>Sugar</option><option>Military</option><option>Aviation</option><option>Heavy Equipment</option><option>Consultants</option><option>General Industry</option><option>Contractors</option><option>OEM</option>
+  </select>
+  <select id="asRep" onchange="renderClients()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;">
+    <option value="">👤 كل المندوبين</option>
+  </select>
+  <button class="btn-sec" style="padding:7px 12px;font-size:12px" onclick="clearAdvSearch()">✖️ مسح الفلاتر</button>
+</div>
+<div id="filterBar" class="filter-bar" style="display:none">
   <select id="filterRegion" onchange="applyFilters()">
     <option value="">كل المناطق</option>
     <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option>
@@ -259,6 +287,9 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 <div id="clientsContainer"></div>
       </div>
       <div id="historyPage" style="display:none"><div id="historyContainer"></div></div>
+      <div id="statsPage" style="display:none">
+        <div id="statsContainer"></div>
+      </div>
       <div id="usersPage" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
           <div style="font-size:15px;font-weight:700">إدارة المستخدمين</div>
@@ -301,6 +332,38 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 <!-- DETAIL -->
 <div class="mo" id="detailModal"><div class="modal detail-modal"><div id="detailContent"></div></div></div>
 
+
+<!-- EXPORT MODAL -->
+<div class="mo" id="exportModal">
+  <div class="modal">
+    <div class="mh"><div class="mt">📤 تصدير Excel</div><button class="mc" onclick="closeModal('exportModal')">×</button></div>
+    <div class="mb">
+      <div class="ig">
+        <label>فلتر بالمنطقة (اختياري)</label>
+        <select id="exp_region" style="">
+          <option value="">كل المناطق</option>
+          <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option>
+        </select>
+      </div>
+      <div class="ig">
+        <label>فلتر بالقطاع (اختياري)</label>
+        <select id="exp_industry">
+          <option value="">كل القطاعات</option>
+          <option>Oil and Gas</option><option>Petrochemical</option><option>Marine</option><option>Water and Waste Water</option><option>Paper</option><option>Facilities HVAC</option><option>Power Generation</option><option>Renewable Energy</option><option>Mining</option><option>Steel</option><option>Cement</option><option>Food and Pharmaceutical</option><option>Sugar</option><option>Military</option><option>Aviation</option><option>Heavy Equipment</option><option>Consultants</option><option>General Industry</option><option>Contractors</option><option>OEM</option>
+        </select>
+      </div>
+      <div class="ig">
+        <label>البيانات المصدرة</label>
+        <select id="exp_type">
+          <option value="all">كل البيانات</option>
+          <option value="emails">الإيميلات فقط (للتسويق)</option>
+          <option value="phones">أرقام الموبايل فقط</option>
+        </select>
+      </div>
+    </div>
+    <div class="mf"><button class="btn-cancel" onclick="closeModal('exportModal')">إلغاء</button><button class="btn-save" onclick="exportExcel()">📤 تصدير</button></div>
+  </div>
+</div>
 
 <!-- IMPORT EXCEL -->
 <div class="mo" id="importModal">
@@ -483,9 +546,9 @@ function showApp(){
   document.getElementById('userAvatar').textContent=CU.name[0];
   const rc={'أدمن':'r-admin','مدير مبيعات':'r-manager','مندوب مبيعات':'r-sales'};
   document.getElementById('userRoleBadge').innerHTML=`<span class="role-badge ${rc[CU.role]||'r-sales'}">${CU.role}</span>`;
-  if(isAdmin()){document.getElementById('navUsers').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
-  if(isManager()){document.getElementById('importBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
-  loadClients();
+  if(isAdmin()){document.getElementById('navUsers').style.display='flex';document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
+  if(isManager()){document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
+  loadClients();loadRepsForSearch();
 }
 
 function showPage(page,el){
@@ -494,9 +557,11 @@ function showPage(page,el){
   document.getElementById('clientsPage').style.display=page==='clients'?'block':'none';
   document.getElementById('historyPage').style.display=page==='history'?'block':'none';
   document.getElementById('usersPage').style.display=page==='users'?'block':'none';
+  document.getElementById('statsPage').style.display=page==='stats'?'block':'none';
   document.getElementById('addClientBtn').style.display=page==='clients'?'flex':'none';
   if(page==='history')renderHistory();
   if(page==='users')loadUsers();
+  if(page==='stats')renderStats();
 }
 
 async function loadClients(){
@@ -591,11 +656,14 @@ function renderClients(){
   const fReg=assignMode?(document.getElementById('filterRegion').value||''):'';
   const fInd=assignMode?(document.getElementById('filterIndustry').value||''):'';
   const fRep=assignMode?(document.getElementById('filterRep').value||''):'';
+  const asReg=document.getElementById('asRegion')?document.getElementById('asRegion').value:'';
+  const asInd=document.getElementById('asIndustry')?document.getElementById('asIndustry').value:'';
+  const asRepVal=document.getElementById('asRep')?document.getElementById('asRep').value:'';
   filteredClients=clients.filter(c=>{
     const matchQ=(c.company||'').toLowerCase().includes(q)||(c.engineer||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q)||(c.industry||'').toLowerCase().includes(q);
-    const matchReg=!fReg||(c.region||'')=== fReg;
-    const matchInd=!fInd||(c.industry||'')=== fInd;
-    const matchRep=!fRep||(c.assigned_to||'')=== fRep;
+    const matchReg=(!fReg&&!asReg)||(fReg&&(c.region||'')===fReg)||(asReg&&(c.region||'')===asReg);
+    const matchInd=(!fInd&&!asInd)||(fInd&&(c.industry||'')===fInd)||(asInd&&(c.industry||'')===asInd);
+    const matchRep=(!fRep&&!asRepVal)||(fRep&&(c.assigned_to||'')===fRep)||(asRepVal&&(c.assigned_to||'')===asRepVal);
     return matchQ&&matchReg&&matchInd&&matchRep;
   });
   const con=document.getElementById('clientsContainer');
@@ -624,6 +692,7 @@ function card(c,i){
       <button class="ab wa" onclick="wa('${c.whatsapp||c.phone||''}','${c.company}')">💬<span>واتساب</span></button>
       <button class="ab call" onclick="call('${c.phone||''}')">📞<span>اتصال</span></button>
       <button class="ab map" onclick="omap('${c.address||c.region||''}')">🗺️<span>خريطة</span></button>
+      ${c.email?`<button class="ab mail" onclick="sendMail('${c.email}','${c.company}')">📧<span>إيميل</span></button>`:''}
       <button class="ab hist" onclick="openDetail('${c.id}')">📋<span>تاريخ</span></button>
     </div></div>`;
 }
@@ -668,6 +737,7 @@ async function openDetail(id){
         <button class="d-btn wa" onclick="wa('${c.whatsapp||c.phone||''}','${c.company}')">💬<span>واتساب</span></button>
         <button class="d-btn call" onclick="call('${c.phone||''}')">📞<span>اتصال</span></button>
         <button class="d-btn map" onclick="omap('${c.address||c.region||''}')">🗺️<span>خريطة</span></button>
+        ${c.email?`<button class="d-btn" style="background:rgba(244,163,0,0.15);color:var(--gold);border:1px solid rgba(244,163,0,0.3)" onclick="sendMail('${c.email}','${c.company}')">📧<span>إيميل</span></button>`:''}
         <button class="d-btn" style="background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)" onclick="openEditModal('${c.id}')">✏️<span>تعديل</span></button>
       </div>
       <div class="ig-grid">
@@ -798,6 +868,11 @@ async function delUser(id){
   catch(e){showToast('❌ خطأ','error');}
 }
 
+
+function sendMail(email, company){
+  window.location.href=`mailto:${email}?subject=${encodeURIComponent('Inter-Tech - Belzona Egypt')}&body=${encodeURIComponent('مرحباً،\n\nأتواصل معكم من Inter-Tech وكيل Belzona في مصر.\n\nمع تحياتي')}`;
+}
+
 function wa(phone,company){const c=phone.toString().replace(/\D/g,'');const i=c.startsWith('0')?'2'+c:c;window.open(`https://wa.me/${i}?text=${encodeURIComponent('مرحباً، أتواصل معكم من Inter-Tech وكيل Belzona في مصر')}`,'_blank');}
 function call(phone){window.location.href=`tel:${phone}`;}
 function omap(addr){window.open(`https://www.google.com/maps/search/${encodeURIComponent(addr+', مصر')}`,'_blank');}
@@ -895,6 +970,54 @@ async function updateClient(){
   }catch(e){console.error(e);showToast('❌ خطأ في الحفظ','error');}
 }
 
+function openExportModal(){
+  document.getElementById('exp_region').value='';
+  document.getElementById('exp_industry').value='';
+  document.getElementById('exp_type').value='all';
+  openModal('exportModal');
+}
+
+function exportExcel(){
+  const fReg=document.getElementById('exp_region')?document.getElementById('exp_region').value:'';
+  const fInd=document.getElementById('exp_industry')?document.getElementById('exp_industry').value:'';
+  const expType=document.getElementById('exp_type')?document.getElementById('exp_type').value:'all';
+
+  let toExport=clients.filter(c=>{
+    const matchReg=!fReg||(c.region||'')===fReg;
+    const matchInd=!fInd||(c.industry||'')===fInd;
+    return matchReg&&matchInd;
+  });
+
+  if(!toExport.length){showToast('❌ لا يوجد عملاء للتصدير','error');return;}
+
+  let rows,fname;
+  if(expType==='emails'){
+    const withEmail=toExport.filter(c=>c.email);
+    if(!withEmail.length){showToast('❌ لا يوجد إيميلات','error');return;}
+    rows=[['اسم الشركة','الإيميل','القطاع','المنطقة']];
+    withEmail.forEach(c=>rows.push([c.company||'',c.email||'',c.industry||'',c.region||'']));
+    fname=`Belzona_Emails${fReg?'_'+fReg:''}${fInd?'_'+fInd:''}.xlsx`;
+    showToast(`✅ تم تصدير ${withEmail.length} إيميل`,'success');
+  } else if(expType==='phones'){
+    rows=[['اسم الشركة','الموبايل','واتساب','القطاع','المنطقة']];
+    toExport.forEach(c=>rows.push([c.company||'',c.phone||'',c.whatsapp||'',c.industry||'',c.region||'']));
+    fname=`Belzona_Phones${fReg?'_'+fReg:''}${fInd?'_'+fInd:''}.xlsx`;
+    showToast(`✅ تم تصدير ${toExport.length} رقم`,'success');
+  } else {
+    rows=[['اسم الشركة','القطاع الصناعي','المنطقة','العنوان','المهندس المسؤول','الموبايل','واتساب','الإيميل','ملاحظات','تاريخ الإضافة']];
+    toExport.forEach(c=>rows.push([c.company||'',c.industry||'',c.region||'',c.address||'',c.engineer||'',c.phone||'',c.whatsapp||'',c.email||'',c.notes||'',c.created_at?new Date(c.created_at).toLocaleDateString('ar-EG'):'']));
+    fname=`Belzona_Clients${fReg?'_'+fReg:''}${fInd?'_'+fInd:''}.xlsx`;
+    showToast(`✅ تم تصدير ${toExport.length} عميل`,'success');
+  }
+
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:30},{wch:25},{wch:20},{wch:15}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'البيانات');
+  XLSX.writeFile(wb,fname);
+  closeModal('exportModal');
+}
+
 function openImportModal(){
   document.getElementById('imp_industry').value='';
   document.getElementById('imp_region').value='';
@@ -964,6 +1087,74 @@ async function runImport(){
     }catch(err){console.error(err);showToast('❌ خطأ في قراءة الملف','error');}
   };
   reader.readAsBinaryString(file);
+}
+
+function clearAdvSearch(){
+  document.getElementById('asRegion').value='';
+  document.getElementById('asIndustry').value='';
+  document.getElementById('asRep').value='';
+  renderClients();
+}
+
+async function loadRepsForSearch(){
+  try{
+    const users=await sb('users?role=eq.مندوب مبيعات&active=eq.true&select=id,name');
+    const sel=document.getElementById('asRep');
+    if(sel)sel.innerHTML='<option value="">👤 كل المندوبين</option>'+users.map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+  }catch(e){}
+}
+
+function renderStats(){
+  const con=document.getElementById('statsContainer');
+  if(!clients.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><p>لا يوجد بيانات بعد</p></div>';return;}
+  
+  // Count by industry
+  const byInd={};
+  clients.forEach(c=>{const k=c.industry||'غير محدد';byInd[k]=(byInd[k]||0)+1;});
+  const indSorted=Object.entries(byInd).sort((a,b)=>b[1]-a[1]);
+  
+  // Count by region
+  const byReg={};
+  clients.forEach(c=>{const k=c.region||'غير محدد';byReg[k]=(byReg[k]||0)+1;});
+  const regSorted=Object.entries(byReg).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  
+  // Count history this month
+  const now=new Date();
+  const thisMonth=clients.flatMap(c=>(c.history||[]).filter(h=>{const d=new Date(h.created_at);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}));
+  
+  // Unassigned
+  const unassigned=clients.filter(c=>!c.assigned_to).length;
+
+  const maxInd=indSorted[0]?.[1]||1;
+  const maxReg=regSorted[0]?.[1]||1;
+
+  con.innerHTML=`
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">${clients.length}</div><div class="stat-label">إجمالي العملاء</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${thisMonth.length}</div><div class="stat-label">تعاملات هذا الشهر</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${indSorted.length}</div><div class="stat-label">قطاعات صناعية</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${unassigned}</div><div class="stat-label">عملاء بدون مندوب</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="chart-card">
+        <div class="chart-title">📊 توزيع القطاعات الصناعية</div>
+        ${indSorted.map(([k,v])=>`
+          <div class="bar-row">
+            <div class="bar-label">${k}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(v/maxInd*100).toFixed(0)}%"></div></div>
+            <div class="bar-count">${v}</div>
+          </div>`).join('')}
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🗺️ توزيع المناطق (أعلى 10)</div>
+        ${regSorted.map(([k,v])=>`
+          <div class="bar-row">
+            <div class="bar-label">${k}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(v/maxReg*100).toFixed(0)}%;background:var(--blue)"></div></div>
+            <div class="bar-count">${v}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
 }
 
 function exReg(addr){const rs=['القاهرة','الجيزة','الإسكندرية','الدقهلية','البحر الأحمر','البحيرة','الفيوم','الغربية','الإسماعيلية','المنوفية','المنيا','القليوبية','الوادي الجديد','السويس','أسوان','أسيوط','بني سويف','بورسعيد','دمياط','الشرقية','جنوب سيناء','كفر الشيخ','مطروح','الأقصر','قنا','شمال سيناء','سوهاج','السادس من أكتوبر','العاشر من رمضان'];for(let r of rs){if(addr&&addr.includes(r))return r;}return '';}
