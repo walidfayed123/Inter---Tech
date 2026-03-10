@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -266,6 +267,35 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 <!-- DETAIL -->
 <div class="mo" id="detailModal"><div class="modal detail-modal"><div id="detailContent"></div></div></div>
 
+
+<!-- EDIT CLIENT -->
+<div class="mo" id="editModal">
+  <div class="modal">
+    <div class="mh"><div class="mt">✏️ تعديل بيانات العميل</div><button class="mc" onclick="closeModal('editModal')">×</button></div>
+    <div class="mb">
+      <div class="ig"><label>اسم المصنع / الشركة *</label><input type="text" id="e_company" placeholder="مثال: أرامكو مصر"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="ig"><label>نوع الصناعة *</label>
+          <select id="e_industry"><option value="">اختر...</option><option value="Oil and Gas">🛢️ Oil and Gas</option><option value="Petrochemical">⚗️ Petrochemical</option><option value="Marine">⚓ Marine</option><option value="Water and Waste Water">💧 Water and Waste Water</option><option value="Paper">📄 Paper</option><option value="Facilities HVAC">🌡️ Facilities HVAC</option><option value="Power Generation">⚡ Power Generation</option><option value="Renewable Energy">♻️ Renewable Energy</option><option value="Mining">⛏️ Mining</option><option value="Steel">🔩 Steel</option><option value="Cement">🏗️ Cement</option><option value="Food and Pharmaceutical">🌾 Food and Pharmaceutical</option><option value="Sugar">🍬 Sugar</option><option value="Military">🎖️ Military</option><option value="Aviation">✈️ Aviation</option><option value="Heavy Equipment">🚜 Heavy Equipment</option><option value="Consultants">💼 Consultants</option><option value="General Industry">🏭 General Industry</option><option value="Contractors">🔧 Contractors</option><option value="OEM">⚙️ OEM</option></select>
+        </div>
+        <div class="ig"><label>المنطقة *</label>
+          <select id="e_region"><option value="">اختر...</option><option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option><option>أخرى</option></select>
+        </div>
+      </div>
+      <div class="ig"><label>العنوان</label><input type="text" id="e_address" placeholder="المنطقة الصناعية..."></div>
+      <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px;font-size:12px;color:var(--muted);font-weight:700">بيانات المهندس المسؤول</div>
+      <div class="ig"><label>اسم المهندس *</label><input type="text" id="e_engineer" placeholder="م. خالد عبدالله"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="ig"><label>الموبايل *</label><input type="tel" id="e_phone" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
+        <div class="ig"><label>واتساب</label><input type="tel" id="e_whatsapp" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
+      </div>
+      <div class="ig"><label>الإيميل</label><input type="email" id="e_email" placeholder="example@co.com" style="direction:ltr;text-align:right"></div>
+      <div class="ig"><label>ملاحظات</label><textarea id="e_notes" placeholder="أي ملاحظات..."></textarea></div>
+    </div>
+    <div class="mf"><button class="btn-cancel" onclick="closeModal('editModal')">إلغاء</button><button class="btn-save" onclick="updateClient()">💾 حفظ التعديلات</button></div>
+  </div>
+</div>
+
 <!-- ADD USER -->
 <div class="mo" id="userModal">
   <div class="modal">
@@ -467,6 +497,7 @@ async function openDetail(id){
         <button class="d-btn wa" onclick="wa('${c.whatsapp||c.phone||''}','${c.company}')">💬<span>واتساب</span></button>
         <button class="d-btn call" onclick="call('${c.phone||''}')">📞<span>اتصال</span></button>
         <button class="d-btn map" onclick="omap('${c.address||c.region||''}')">🗺️<span>خريطة</span></button>
+        <button class="d-btn" style="background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)" onclick="openEditModal('${c.id}')">✏️<span>تعديل</span></button>
       </div>
       <div class="ig-grid">
         <div class="ii"><div class="il">المهندس</div><div class="iv">👷 ${c.engineer||'—'}</div></div>
@@ -659,6 +690,37 @@ function importExcel(input){
     input.value='';
   };
   reader.readAsBinaryString(file);
+}
+
+
+let editingId=null;
+function openEditModal(id){
+  const c=clients.find(x=>x.id===id);if(!c)return;
+  editingId=id;
+  document.getElementById('e_company').value=c.company||'';
+  document.getElementById('e_industry').value=c.industry||'';
+  document.getElementById('e_region').value=c.region||'';
+  document.getElementById('e_address').value=c.address||'';
+  document.getElementById('e_engineer').value=c.engineer||'';
+  document.getElementById('e_phone').value=c.phone||'';
+  document.getElementById('e_whatsapp').value=c.whatsapp||'';
+  document.getElementById('e_email').value=c.email||'';
+  document.getElementById('e_notes').value=c.notes||'';
+  closeModal('detailModal');
+  openModal('editModal');
+}
+
+async function updateClient(){
+  const company=document.getElementById('e_company').value.trim();
+  const industry=document.getElementById('e_industry').value;
+  const region=document.getElementById('e_region').value;
+  const engineer=document.getElementById('e_engineer').value.trim();
+  const phone=document.getElementById('e_phone').value.trim();
+  if(!company||!industry||!region||!engineer||!phone){showToast('❌ اكمل الحقول المطلوبة *','error');return;}
+  try{
+    await sb(`clients?id=eq.${editingId}`,{method:'PATCH',body:JSON.stringify({company,industry,region,address:document.getElementById('e_address').value.trim(),engineer,phone,whatsapp:document.getElementById('e_whatsapp').value.trim(),email:document.getElementById('e_email').value.trim(),notes:document.getElementById('e_notes').value.trim()})});
+    closeModal('editModal');showToast('✅ تم تعديل بيانات العميل','success');loadClients();
+  }catch(e){console.error(e);showToast('❌ خطأ في الحفظ','error');}
 }
 
 function exReg(addr){const rs=['القاهرة','الجيزة','الإسكندرية','الدقهلية','البحر الأحمر','البحيرة','الفيوم','الغربية','الإسماعيلية','المنوفية','المنيا','القليوبية','الوادي الجديد','السويس','أسوان','أسيوط','بني سويف','بورسعيد','دمياط','الشرقية','جنوب سيناء','كفر الشيخ','مطروح','الأقصر','قنا','شمال سيناء','سوهاج','السادس من أكتوبر','العاشر من رمضان'];for(let r of rs){if(addr&&addr.includes(r))return r;}return '';}
