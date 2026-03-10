@@ -562,7 +562,7 @@ async function deleteSelected(){
   try{
     const ids=Array.from(selectedClients);
     for(const id of ids){
-      await sb(`clients?id=eq.${id}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+      await sb(`clients?id=eq.${id}`,{method:'DELETE'});
     }
     showToast(`✅ تم حذف ${ids.length} عميل`,'success');
     selectedClients.clear();toggleAssignMode();loadClients();
