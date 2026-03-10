@@ -254,6 +254,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
     <option value="">اختر المندوب...</option>
   </select>
   <button class="btn-save" style="padding:8px 16px;font-size:12px" onclick="assignSelected()">🎯 وزّع العملاء</button>
+  <button class="btn-danger" style="padding:8px 16px;font-size:12px" onclick="deleteSelected()">🗑️ حذف المحدد</button>
 </div>
 <div id="clientsContainer"></div>
       </div>
@@ -553,6 +554,19 @@ function toggleSelect(id,e){
 
 function updateSelCount(){
   document.getElementById('selCount').textContent=selectedClients.size+' عميل محدد';
+}
+
+async function deleteSelected(){
+  if(!selectedClients.size){showToast('❌ حدد عملاء أولاً','error');return;}
+  if(!confirm(`هل أنت متأكد من حذف ${selectedClients.size} عميل؟ لا يمكن التراجع!`))return;
+  try{
+    const ids=Array.from(selectedClients);
+    for(const id of ids){
+      await sb(`clients?id=eq.${id}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+    }
+    showToast(`✅ تم حذف ${ids.length} عميل`,'success');
+    selectedClients.clear();toggleAssignMode();loadClients();
+  }catch(e){console.error(e);showToast('❌ خطأ في الحذف','error');}
 }
 
 async function assignSelected(){
