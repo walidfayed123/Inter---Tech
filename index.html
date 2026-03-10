@@ -160,6 +160,16 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .ind-water{background:rgba(59,130,246,0.12);color:var(--blue);}
 .ind-steel{background:rgba(150,180,220,0.12);color:#96b4dc;}
 .ind-other{background:rgba(120,120,120,0.12);color:#888;}
+
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.filter-bar select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;}
+.filter-bar select:focus{border-color:rgba(200,16,46,0.5);}
+.assign-bar{display:none;background:rgba(200,16,46,0.08);border:1px solid rgba(200,16,46,0.25);border-radius:10px;padding:10px 14px;margin-bottom:12px;align-items:center;gap:10px;flex-wrap:wrap;}
+.assign-bar.show{display:flex;}
+.sel-count{font-size:13px;font-weight:700;color:var(--red);}
+.cb-client{width:16px;height:16px;cursor:pointer;accent-color:var(--red);}
+.client-card.selected{border-color:rgba(200,16,46,0.5);background:rgba(200,16,46,0.05);}
+
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 22px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 8px 30px rgba(0,0,0,0.4);display:flex;align-items:center;gap:8px;}
 .toast.show{opacity:1;}
 .toast.success{border-color:rgba(0,200,150,0.4);}
@@ -213,6 +223,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       <div class="topbar-right">
         <div class="sw"><span style="color:var(--muted)">🔍</span><input type="text" id="searchInput" placeholder="ابحث..." oninput="renderClients()"></div>
         <label class="btn-sec" id="importBtn" style="display:none;cursor:pointer">📥 استيراد Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)"></label>
+        <button class="btn-sec" id="assignBtn" style="display:none" onclick="toggleAssignMode()">🎯 توزيع جماعي</button>
         <button class="btn-add" id="addClientBtn" onclick="openAddModal()">＋ عميل جديد</button>
       </div>
     </div>
@@ -222,7 +233,29 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
           <div class="view-tab active" onclick="setView('grid',this)">⊞ بطاقات</div>
           <div class="view-tab" onclick="setView('list',this)">☰ قائمة</div>
         </div>
-        <div id="clientsContainer"></div>
+        <div id="filterBar" class="filter-bar" style="display:none">
+  <select id="filterRegion" onchange="applyFilters()">
+    <option value="">كل المناطق</option>
+    <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option>
+  </select>
+  <select id="filterIndustry" onchange="applyFilters()">
+    <option value="">كل القطاعات</option>
+    <option>Oil and Gas</option><option>Petrochemical</option><option>Marine</option><option>Water and Waste Water</option><option>Paper</option><option>Facilities HVAC</option><option>Power Generation</option><option>Renewable Energy</option><option>Mining</option><option>Steel</option><option>Cement</option><option>Food and Pharmaceutical</option><option>Sugar</option><option>Military</option><option>Aviation</option><option>Heavy Equipment</option><option>Consultants</option><option>General Industry</option><option>Contractors</option><option>OEM</option>
+  </select>
+  <select id="filterRep" onchange="applyFilters()">
+    <option value="">كل المندوبين</option>
+  </select>
+  <button class="btn-sec" style="padding:7px 12px;font-size:12px" onclick="selectAllFiltered()">☑️ تحديد الكل</button>
+  <button class="btn-sec" style="padding:7px 12px;font-size:12px" onclick="clearSelection()">✖️ إلغاء التحديد</button>
+</div>
+<div class="assign-bar" id="assignBar">
+  <span class="sel-count" id="selCount">0 عميل محدد</span>
+  <select id="assignTo" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;">
+    <option value="">اختر المندوب...</option>
+  </select>
+  <button class="btn-save" style="padding:8px 16px;font-size:12px" onclick="assignSelected()">🎯 وزّع العملاء</button>
+</div>
+<div id="clientsContainer"></div>
       </div>
       <div id="historyPage" style="display:none"><div id="historyContainer"></div></div>
       <div id="usersPage" style="display:none">
@@ -407,8 +440,8 @@ function showApp(){
   document.getElementById('userAvatar').textContent=CU.name[0];
   const rc={'أدمن':'r-admin','مدير مبيعات':'r-manager','مندوب مبيعات':'r-sales'};
   document.getElementById('userRoleBadge').innerHTML=`<span class="role-badge ${rc[CU.role]||'r-sales'}">${CU.role}</span>`;
-  if(isAdmin()){document.getElementById('navUsers').style.display='flex';document.getElementById('importBtn').style.display='flex';}
-  if(isManager()){document.getElementById('importBtn').style.display='flex';}
+  if(isAdmin()){document.getElementById('navUsers').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
+  if(isManager()){document.getElementById('importBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
   loadClients();
 }
 
@@ -427,29 +460,104 @@ async function loadClients(){
   document.getElementById('clientsContainer').innerHTML='<div class="loading"><div class="spin"></div> جاري التحميل...</div>';
   try{
     let q='clients?select=*,history(*)&order=created_at.desc';
-    if(CU.role==='مندوب مبيعات'&&CU.region)q+=`&region=eq.${encodeURIComponent(CU.region)}`;
+    if(CU.role==='مندوب مبيعات')q+=`&assigned_to=eq.${encodeURIComponent(CU.id)}`;
     clients=await sb(q);
     document.getElementById('clientsBadge').textContent=clients.length;
     renderClients();
   }catch(e){document.getElementById('clientsContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطأ في التحميل - تأكد من إعدادات Supabase</p></div>';}
 }
 
+let assignMode=false;let selectedClients=new Set();let filteredClients=[];
+
+function applyFilters(){renderClients();}
+
+function toggleAssignMode(){
+  assignMode=!assignMode;
+  selectedClients.clear();
+  document.getElementById('filterBar').style.display=assignMode?'flex':'none';
+  document.getElementById('assignBar').classList.toggle('show',assignMode);
+  document.getElementById('assignBtn').textContent=assignMode?'✖️ إلغاء':'🎯 توزيع جماعي';
+  if(assignMode)loadUsersForAssign();
+  renderClients();
+}
+
+async function loadUsersForAssign(){
+  try{
+    const users=await sb('users?role=eq.مندوب مبيعات&active=eq.true&select=id,name');
+    const sel=document.getElementById('assignTo');
+    const fsel=document.getElementById('filterRep');
+    sel.innerHTML='<option value="">اختر المندوب...</option>'+users.map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+    fsel.innerHTML='<option value="">كل المندوبين</option>'+users.map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+  }catch(e){}
+}
+
+function selectAllFiltered(){
+  filteredClients.forEach(c=>selectedClients.add(c.id));
+  updateSelCount();renderClients();
+}
+
+function clearSelection(){
+  selectedClients.clear();updateSelCount();renderClients();
+}
+
+function toggleSelect(id,e){
+  e.stopPropagation();
+  if(selectedClients.has(id))selectedClients.delete(id);
+  else selectedClients.add(id);
+  updateSelCount();
+  const card=document.querySelector(`[data-id="${id}"]`);
+  if(card)card.classList.toggle('selected',selectedClients.has(id));
+}
+
+function updateSelCount(){
+  document.getElementById('selCount').textContent=selectedClients.size+' عميل محدد';
+}
+
+async function assignSelected(){
+  const repId=document.getElementById('assignTo').value;
+  if(!repId){showToast('❌ اختر المندوب أولاً','error');return;}
+  if(!selectedClients.size){showToast('❌ حدد عملاء أولاً','error');return;}
+  try{
+    const ids=Array.from(selectedClients);
+    for(let i=0;i<ids.length;i+=50){
+      const batch=ids.slice(i,i+50);
+      for(const id of batch){
+        await sb(`clients?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({assigned_to:repId})});
+      }
+    }
+    showToast(`✅ تم توزيع ${ids.length} عميل`,'success');
+    selectedClients.clear();toggleAssignMode();loadClients();
+  }catch(e){showToast('❌ خطأ في التوزيع','error');}
+}
+
 function renderClients(){
   const q=document.getElementById('searchInput').value.toLowerCase();
-  const f=clients.filter(c=>(c.company||'').toLowerCase().includes(q)||(c.engineer||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q)||(c.industry||'').toLowerCase().includes(q));
+  const fReg=assignMode?(document.getElementById('filterRegion').value||''):'';
+  const fInd=assignMode?(document.getElementById('filterIndustry').value||''):'';
+  const fRep=assignMode?(document.getElementById('filterRep').value||''):'';
+  filteredClients=clients.filter(c=>{
+    const matchQ=(c.company||'').toLowerCase().includes(q)||(c.engineer||'').toLowerCase().includes(q)||(c.region||'').toLowerCase().includes(q)||(c.industry||'').toLowerCase().includes(q);
+    const matchReg=!fReg||(c.region||'')=== fReg;
+    const matchInd=!fInd||(c.industry||'')=== fInd;
+    const matchRep=!fRep||(c.assigned_to||'')=== fRep;
+    return matchQ&&matchReg&&matchInd&&matchRep;
+  });
   const con=document.getElementById('clientsContainer');
   if(!clients.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">🏭</div><p>لا يوجد عملاء بعد</p><small>اضغط "عميل جديد"</small></div>';return;}
-  if(!f.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>لا توجد نتائج</p></div>';return;}
-  if(currentView==='grid'){con.className='clients-grid';con.innerHTML=f.map((c,i)=>card(c,i)).join('');}
-  else{con.className='clients-list';con.innerHTML=`<div class="li li-hdr"><div>الشركة</div><div>المهندس</div><div>الصناعة</div><div>المنطقة</div><div>تواصل</div></div>`+f.map((c,i)=>listI(c,i)).join('');}
+  if(!filteredClients.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>لا توجد نتائج</p></div>';return;}
+  if(currentView==='grid'){con.className='clients-grid';con.innerHTML=filteredClients.map((c,i)=>card(c,i)).join('');}
+  else{con.className='clients-list';con.innerHTML=`<div class="li li-hdr"><div>الشركة</div><div>المهندس</div><div>الصناعة</div><div>المنطقة</div><div>تواصل</div></div>`+filteredClients.map((c,i)=>listI(c,i)).join('');}
 }
 
 function card(c,i){
   const ind=IND[c.industry]||IND['أخرى'];
   const h=(c.history||[]).length;
-  return`<div class="client-card" style="animation-delay:${i*.04}s" onclick="openDetail('${c.id}')">
+  const isSelected=selectedClients.has(c.id);
+  return`<div class="client-card${isSelected?' selected':''}" data-id="${c.id}" style="animation-delay:${i*.04}s" onclick="${assignMode?`toggleSelect('${c.id}',event)`:`openDetail('${c.id}')`}">
     <div class="cc-header"><div class="cc-av" style="background:${gc(c.company)}">${(c.company||'?')[0]}</div>
-    <div><div class="cc-name">${c.company}</div><div class="cc-eng">👷 ${c.engineer||'—'}</div></div></div>
+    <div style="flex:1"><div class="cc-name">${c.company}</div><div class="cc-eng">👷 ${c.engineer||'—'}</div></div>
+    ${assignMode?`<input type="checkbox" class="cb-client" ${isSelected?'checked':''} onclick="toggleSelect('${c.id}',event)">`:''}
+    </div>
     <div class="cc-body">
       <div class="cc-row"><span class="ind-badge ${ind.cls}">${ind.icon} ${c.industry||'—'}</span></div>
       <div class="cc-row">📍 <strong>${c.region||'—'}</strong></div>
