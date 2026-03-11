@@ -199,8 +199,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);gap:10px;font-size:14px;}
 .spin{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:sp 0.8s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
+.desktop-only{display:flex;}
 @media(max-width:768px){
   .sidebar{display:none;}
+  .desktop-only{display:none !important;}
+  #mobileMenuBtn{display:flex !important;}
   .main{margin-right:0;}
   .clients-grid{grid-template-columns:1fr;}
   .ig-grid{grid-template-columns:1fr;}
@@ -300,10 +303,19 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="topbar-right">
         <div class="sw"><span style="color:var(--muted)">🔍</span><input type="text" id="searchInput" placeholder="ابحث..." oninput="renderClients()"></div>
-        <button class="btn-sec" id="importBtn" style="display:none" onclick="openImportModal()">📥 استيراد Excel</button>
-        <button class="btn-sec" id="exportBtn" style="display:none" onclick="openExportModal()">📤 تصدير Excel</button>
-        <button class="btn-sec" id="assignBtn" style="display:none" onclick="toggleAssignMode()">🎯 توزيع جماعي</button>
+        <!-- Desktop buttons -->
+        <button class="btn-sec desktop-only" id="importBtn" style="display:none" onclick="openImportModal()">📥 استيراد Excel</button>
+        <button class="btn-sec desktop-only" id="exportBtn" style="display:none" onclick="openExportModal()">📤 تصدير Excel</button>
+        <button class="btn-sec desktop-only" id="assignBtn" style="display:none" onclick="toggleAssignMode()">🎯 توزيع جماعي</button>
         <button class="btn-add" id="addClientBtn" onclick="openAddModal()">＋ عميل جديد</button>
+        <!-- Mobile menu button -->
+        <button id="mobileMenuBtn" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-size:18px;cursor:pointer" onclick="toggleMobileMenu()">⋮</button>
+      </div>
+      <!-- Mobile dropdown menu -->
+      <div id="mobileMenu" style="display:none;position:fixed;top:56px;left:0;right:0;background:rgba(10,15,24,0.98);border-bottom:1px solid var(--border);z-index:150;padding:12px;flex-direction:column;gap:8px;">
+        <button class="btn-sec" id="importBtnM" style="display:none;width:100%;justify-content:center" onclick="openImportModal();toggleMobileMenu()">📥 استيراد Excel</button>
+        <button class="btn-sec" id="exportBtnM" style="display:none;width:100%;justify-content:center" onclick="openExportModal();toggleMobileMenu()">📤 تصدير Excel</button>
+        <button class="btn-sec" id="assignBtnM" style="display:none;width:100%;justify-content:center" onclick="toggleAssignMode();toggleMobileMenu()">🎯 توزيع جماعي</button>
       </div>
     </div>
     <div class="content">
@@ -629,8 +641,28 @@ function showApp(){
   document.getElementById('userAvatar').textContent=CU.name[0];
   const rc={'أدمن':'r-admin','مدير مبيعات':'r-manager','مندوب مبيعات':'r-sales'};
   document.getElementById('userRoleBadge').innerHTML=`<span class="role-badge ${rc[CU.role]||'r-sales'}">${CU.role}</span>`;
-  if(isAdmin()){document.getElementById('navUsers').style.display='flex';document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';const ms=document.getElementById('mn_stats');if(ms)ms.style.display='flex';const mu=document.getElementById('mn_users');if(mu)mu.style.display='flex';}
-  if(isManager()){document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';const ms=document.getElementById('mn_stats');if(ms)ms.style.display='flex';}
+  if(isAdmin()){
+    document.getElementById('navUsers').style.display='flex';
+    document.getElementById('navStats').style.display='flex';
+    document.getElementById('importBtn').style.display='flex';
+    document.getElementById('exportBtn').style.display='flex';
+    document.getElementById('assignBtn').style.display='flex';
+    document.getElementById('importBtnM').style.display='flex';
+    document.getElementById('exportBtnM').style.display='flex';
+    document.getElementById('assignBtnM').style.display='flex';
+    const ms=document.getElementById('mn_stats');if(ms)ms.style.display='flex';
+    const mu=document.getElementById('mn_users');if(mu)mu.style.display='flex';
+  }
+  if(isManager()){
+    document.getElementById('navStats').style.display='flex';
+    document.getElementById('importBtn').style.display='flex';
+    document.getElementById('exportBtn').style.display='flex';
+    document.getElementById('assignBtn').style.display='flex';
+    document.getElementById('importBtnM').style.display='flex';
+    document.getElementById('exportBtnM').style.display='flex';
+    document.getElementById('assignBtnM').style.display='flex';
+    const ms=document.getElementById('mn_stats');if(ms)ms.style.display='flex';
+  }
   loadClients();loadRepsForSearch();
 }
 
@@ -1302,6 +1334,19 @@ function renderContactsList(prefix){
     </tr>`).join('')}
   </table>`;
 }
+
+function toggleMobileMenu(){
+  const m=document.getElementById('mobileMenu');
+  m.style.display=m.style.display==='flex'?'none':'flex';
+}
+// Close mobile menu when clicking outside
+document.addEventListener('click',function(e){
+  const menu=document.getElementById('mobileMenu');
+  const btn=document.getElementById('mobileMenuBtn');
+  if(menu&&btn&&!menu.contains(e.target)&&!btn.contains(e.target)){
+    menu.style.display='none';
+  }
+});
 
 function setMobileNav(page){
   ['clients','history','stats','users'].forEach(p=>{
