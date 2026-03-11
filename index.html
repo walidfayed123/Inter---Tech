@@ -646,10 +646,10 @@ async function loadClients(){
   try{
     let base='clients?select=*,history(*)&order=created_at.desc';
     if(CU.role==='مندوب مبيعات')base+=`&assigned_to=eq.${encodeURIComponent(CU.id)}`;
-    // Fetch all records by paginating (Supabase default limit is 1000)
+    // Fetch all records by paginating using offset/limit
     let all=[];let from=0;const pageSize=1000;
     while(true){
-      const page=await sb(base,{headers:{'Range':`${from}-${from+pageSize-1}`,'Range-Unit':'items'}});
+      const page=await sb(base+`&limit=${pageSize}&offset=${from}`);
       all=all.concat(page);
       if(page.length<pageSize)break;
       from+=pageSize;
