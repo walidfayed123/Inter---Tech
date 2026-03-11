@@ -420,7 +420,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="ig"><label>ملاحظات</label><textarea id="f_notes" placeholder="أي ملاحظات..."></textarea></div>
     </div>
-    <div class="mf"><button class="btn-cancel" onclick="closeModal('addModal')">إلغاء</button><button class="btn-save" onclick="saveClient()">💾 حفظ</button></div>
+    <div class="mf"><button class="btn-cancel" onclick="closeModal('addModal')">إلغاء</button><button class="btn-save" id="saveClientBtn" onclick="saveClient()" ontouchend="event.preventDefault();saveClient()">💾 حفظ</button></div>
   </div>
 </div>
 
@@ -535,7 +535,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="ig"><label>ملاحظات</label><textarea id="e_notes" placeholder="أي ملاحظات..."></textarea></div>
     </div>
-    <div class="mf"><button class="btn-cancel" onclick="closeModal('editModal')">إلغاء</button><button class="btn-save" onclick="updateClient()">💾 حفظ التعديلات</button></div>
+    <div class="mf"><button class="btn-cancel" onclick="closeModal('editModal')">إلغاء</button><button class="btn-save" id="updateClientBtn" onclick="updateClient()" ontouchend="event.preventDefault();updateClient()">💾 حفظ التعديلات</button></div>
   </div>
 </div>
 
@@ -932,6 +932,9 @@ function openAddModal(){
 }
 
 async function saveClient(){
+  const btn=document.getElementById('saveClientBtn');
+  if(btn&&btn.disabled)return;
+  if(btn){btn.disabled=true;setTimeout(()=>btn.disabled=false,2000);}
   const company=document.getElementById('f_company').value.trim();
   const industry=document.getElementById('f_industry').value;
   const region=document.getElementById('f_region').value;
@@ -1096,6 +1099,9 @@ function openEditModal(id){
 }
 
 async function updateClient(){
+  const btn=document.getElementById('updateClientBtn');
+  if(btn&&btn.disabled)return;
+  if(btn){btn.disabled=true;setTimeout(()=>btn.disabled=false,2000);}
   const company=document.getElementById('e_company').value.trim();
   const industry=document.getElementById('e_industry').value;
   const region=document.getElementById('e_region').value;
