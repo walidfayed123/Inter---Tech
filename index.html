@@ -93,7 +93,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .ab.hist:hover{background:rgba(200,16,46,0.1);color:var(--red);border-color:rgba(200,16,46,0.3);}
 .ab.mail:hover{background:rgba(244,163,0,0.1);color:var(--gold);border-color:rgba(244,163,0,0.3);}
 .clients-list{display:flex;flex-direction:column;gap:8px;}
-.li{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr auto;gap:12px;align-items:center;cursor:pointer;transition:all 0.15s;}
+.li{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr auto;gap:12px;align-items:center;cursor:pointer;transition:all 0.15s;min-width:0;}
 .li:hover{border-color:rgba(200,16,46,0.2);background:rgba(200,16,46,0.03);}
 .li-hdr{background:rgba(0,0,0,0.3)!important;cursor:default!important;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0.5px;}
 .li-hdr:hover{background:rgba(0,0,0,0.3)!important;border-color:var(--border)!important;}
@@ -212,6 +212,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
   .topbar-right .btn-sec,.topbar-right .btn-add{padding:6px 10px;font-size:11px;}
   .page-title{font-size:13px;}
   #mobileLogo{display:flex !important;}
+  .li{grid-template-columns:1fr auto !important;padding:12px !important;}
+  .li-hdr{display:none !important;}
+  .li .li-engineer,.li .li-industry,.li .li-region{display:none !important;}
+  .li .li-mobile-info{display:flex !important;}
   .sw input{width:100px;}
   .modal{width:95vw;max-height:90vh;overflow-y:auto;}
   .add-contact-row{grid-template-columns:1fr 1fr;gap:6px;}
@@ -823,17 +827,20 @@ function card(c,i){
 function listI(c,i){
   const ind=IND[c.industry]||IND['أخرى'];
   return`<div class="li" onclick="openDetail('${c.id}')">
-    <div style="display:flex;align-items:center;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0">
       <div style="width:34px;height:34px;border-radius:8px;background:${gc(c.company)};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0">${(c.company||'?')[0]}</div>
-      <div><div style="font-size:13px;font-weight:700">${c.company}</div><div style="font-size:11px;color:var(--muted)">${(c.history||[]).length} تعامل</div></div>
+      <div style="min-width:0">
+        <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.company}</div>
+        <div style="font-size:11px;color:var(--muted)">${ind.icon} ${c.industry||'—'} • 📍 ${c.region||'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${(c.history||[]).length} تعامل</div>
+      </div>
     </div>
-    <div style="font-size:12px">👷 ${c.engineer||'—'}</div>
-    <div><span class="ind-badge ${ind.cls}" style="font-size:10px">${ind.icon} ${c.industry||'—'}</span></div>
-    <div style="font-size:12px;color:var(--muted)">📍 ${c.region||'—'}</div>
-    <div style="display:flex;gap:6px" onclick="event.stopPropagation()">
+    <div class="li-engineer" style="font-size:12px">👷 ${c.engineer||'—'}</div>
+    <div class="li-industry"><span class="ind-badge ${ind.cls}" style="font-size:10px">${ind.icon} ${c.industry||'—'}</span></div>
+    <div class="li-region" style="font-size:12px;color:var(--muted)">📍 ${c.region||'—'}</div>
+    <div style="display:flex;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">
       <button class="ab wa" style="padding:6px" onclick="wa('${c.whatsapp||c.phone||''}','${c.company}')">💬</button>
       <button class="ab call" style="padding:6px" onclick="call('${c.phone||''}')">📞</button>
-      <button class="ab map" style="padding:6px" onclick="omap('${c.address||c.region||''}')">🗺️</button>
     </div></div>`;
 }
 
