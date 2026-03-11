@@ -199,14 +199,45 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);gap:10px;font-size:14px;}
 .spin{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:sp 0.8s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
-@media(max-width:768px){.sidebar{display:none;}.main{margin-right:0;}.clients-grid{grid-template-columns:1fr;}.ig-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main{margin-right:0;}
+  .clients-grid{grid-template-columns:1fr;}
+  .ig-grid{grid-template-columns:1fr;}
+  .topbar{padding:0 12px;height:56px;flex-wrap:wrap;gap:6px;}
+  .topbar-right{gap:6px;flex-wrap:wrap;}
+  .topbar-right .btn-sec,.topbar-right .btn-add{padding:6px 10px;font-size:11px;}
+  .page-title{font-size:13px;}
+  .sw input{width:100px;}
+  .modal{width:95vw;max-height:90vh;overflow-y:auto;}
+  .add-contact-row{grid-template-columns:1fr 1fr;gap:6px;}
+  .add-contact-row input{font-size:11px;}
+  .contacts-table{font-size:11px;}
+  .contacts-table th,.contacts-table td{padding:5px 6px;}
+  .d-btns{gap:6px;flex-wrap:wrap;}
+  .d-btn{padding:8px 12px;font-size:11px;}
+  .detail-modal{width:95vw;}
+  .assign-bar{flex-wrap:wrap;gap:6px;padding:8px 12px;}
+  .assign-bar button{font-size:11px;padding:6px 10px;}
+  #advSearchBar{gap:6px;}
+  #advSearchBar select{font-size:11px;padding:5px 8px;}
+  .client-card{padding:14px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .chart-card{padding:14px;}
+  div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;}
+}
+/* Bottom nav for mobile */
+@media(max-width:768px){
+  #mobileNav{display:flex !important;}
+  .main{padding-bottom:70px;}
+}
 </style>
 </head>
 <body>
 
 <div id="loginScreen" class="screen active">
   <div class="login-box">
-    <div class="login-logo">BZ</div>
+    <div class="login-logo">IT</div>
     <div class="login-title">Inter-Tech CRM</div>
     <div class="login-sub">نظام إدارة عملاء Inter-Tech</div>
     <div class="ig"><label>البريد الإلكتروني</label>
@@ -221,9 +252,27 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 </div>
 
 <div id="appScreen" class="screen">
+  <!-- Mobile Bottom Nav -->
+  <nav id="mobileNav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,15,24,0.98);border-top:1px solid var(--border);z-index:200;height:60px;align-items:stretch;">
+    <div onclick="showPage('clients',this);setMobileNav('clients')" id="mn_clients" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--red);cursor:pointer;font-size:9px;font-weight:700;border-top:2px solid var(--red);">
+      <span style="font-size:20px">🏭</span>العملاء
+    </div>
+    <div onclick="showPage('history',this);setMobileNav('history')" id="mn_history" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);cursor:pointer;font-size:9px;font-weight:700;border-top:2px solid transparent;">
+      <span style="font-size:20px">📋</span>التعاملات
+    </div>
+    <div id="mn_stats" onclick="showPage('stats',this);setMobileNav('stats')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);cursor:pointer;font-size:9px;font-weight:700;border-top:2px solid transparent;display:none">
+      <span style="font-size:20px">📊</span>إحصائيات
+    </div>
+    <div id="mn_users" onclick="showPage('users',this);setMobileNav('users')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);cursor:pointer;font-size:9px;font-weight:700;border-top:2px solid transparent;display:none">
+      <span style="font-size:20px">👥</span>المستخدمين
+    </div>
+    <div onclick="logout()" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);cursor:pointer;font-size:9px;font-weight:700;border-top:2px solid transparent;">
+      <span style="font-size:20px">⏻</span>خروج
+    </div>
+  </nav>
   <aside class="sidebar">
     <div class="sb-logo">
-      <div class="sb-logo-icon">BZ</div>
+      <div class="sb-logo-icon">IT</div>
       <div class="sb-logo-text"><div class="brand">Inter-Tech</div><div class="sub">إدارة العملاء</div></div>
     </div>
     <nav class="sb-nav">
@@ -574,8 +623,8 @@ function showApp(){
   document.getElementById('userAvatar').textContent=CU.name[0];
   const rc={'أدمن':'r-admin','مدير مبيعات':'r-manager','مندوب مبيعات':'r-sales'};
   document.getElementById('userRoleBadge').innerHTML=`<span class="role-badge ${rc[CU.role]||'r-sales'}">${CU.role}</span>`;
-  if(isAdmin()){document.getElementById('navUsers').style.display='flex';document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
-  if(isManager()){document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';}
+  if(isAdmin()){document.getElementById('navUsers').style.display='flex';document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';const ms=document.getElementById('mn_stats');if(ms)ms.style.display='flex';const mu=document.getElementById('mn_users');if(mu)mu.style.display='flex';}
+  if(isManager()){document.getElementById('navStats').style.display='flex';document.getElementById('importBtn').style.display='flex';document.getElementById('exportBtn').style.display='flex';document.getElementById('assignBtn').style.display='flex';const ms=document.getElementById('mn_stats');if(ms)ms.style.display='flex';}
   loadClients();loadRepsForSearch();
 }
 
@@ -595,9 +644,17 @@ function showPage(page,el){
 async function loadClients(){
   document.getElementById('clientsContainer').innerHTML='<div class="loading"><div class="spin"></div> جاري التحميل...</div>';
   try{
-    let q='clients?select=*,history(*)&order=created_at.desc';
-    if(CU.role==='مندوب مبيعات')q+=`&assigned_to=eq.${encodeURIComponent(CU.id)}`;
-    clients=await sb(q);
+    let base='clients?select=*,history(*)&order=created_at.desc';
+    if(CU.role==='مندوب مبيعات')base+=`&assigned_to=eq.${encodeURIComponent(CU.id)}`;
+    // Fetch all records by paginating (Supabase default limit is 1000)
+    let all=[];let from=0;const pageSize=1000;
+    while(true){
+      const page=await sb(base,{headers:{'Range':`${from}-${from+pageSize-1}`,'Range-Unit':'items'}});
+      all=all.concat(page);
+      if(page.length<pageSize)break;
+      from+=pageSize;
+    }
+    clients=all;
     document.getElementById('clientsBadge').textContent=clients.length;
     renderClients();
   }catch(e){document.getElementById('clientsContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطأ في التحميل - تأكد من إعدادات Supabase</p></div>';}
@@ -1238,6 +1295,15 @@ function renderContactsList(prefix){
       </div></td>
     </tr>`).join('')}
   </table>`;
+}
+
+function setMobileNav(page){
+  ['clients','history','stats','users'].forEach(p=>{
+    const el=document.getElementById('mn_'+p);
+    if(!el)return;
+    el.style.color=p===page?'var(--red)':'var(--muted)';
+    el.style.borderTop=p===page?'2px solid var(--red)':'2px solid transparent';
+  });
 }
 
 function exReg(addr){const rs=['القاهرة','الجيزة','الإسكندرية','الدقهلية','البحر الأحمر','البحيرة','الفيوم','الغربية','الإسماعيلية','المنوفية','المنيا','القليوبية','الوادي الجديد','السويس','أسوان','أسيوط','بني سويف','بورسعيد','دمياط','الشرقية','جنوب سيناء','كفر الشيخ','مطروح','الأقصر','قنا','شمال سيناء','سوهاج','السادس من أكتوبر','العاشر من رمضان'];for(let r of rs){if(addr&&addr.includes(r))return r;}return '';}
