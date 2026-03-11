@@ -217,7 +217,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
   .li .li-engineer,.li .li-industry,.li .li-region{display:none !important;}
   .li .li-mobile-info{display:flex !important;}
   .sw input{width:100px;}
-  .modal{width:95vw;max-height:90vh;overflow-y:auto;}
+  .modal{width:100vw !important;max-width:100vw !important;max-height:100vh !important;height:100vh;border-radius:0 !important;display:flex;flex-direction:column;}
+  .mo{padding:0 !important;align-items:flex-end !important;}
+  .mb{flex:1;overflow-y:auto;padding:16px !important;}
+  .mh{flex-shrink:0;}
+  .mf{flex-shrink:0;position:sticky;bottom:0;background:var(--bg2);z-index:10;}
+  .mf .btn-save,.mf .btn-cancel{flex:1;padding:12px !important;font-size:14px !important;}
   .add-contact-row{grid-template-columns:1fr 1fr;gap:6px;}
   .add-contact-row input{font-size:11px;}
   .contacts-table{font-size:11px;}
