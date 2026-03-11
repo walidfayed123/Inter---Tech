@@ -420,7 +420,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="ig"><label>ملاحظات</label><textarea id="f_notes" placeholder="أي ملاحظات..."></textarea></div>
     </div>
-    <div class="mf"><button class="btn-cancel" onclick="closeModal('addModal')">إلغاء</button><button class="btn-save" id="saveClientBtn" onclick="saveClient()" ontouchend="event.preventDefault();saveClient()">💾 حفظ</button></div>
+    <div class="mf"><button class="btn-cancel" onclick="closeModal('addModal')">إلغاء</button><button class="btn-save" id="saveClientBtn" onclick="saveClient()">💾 حفظ</button></div>
   </div>
 </div>
 
@@ -535,7 +535,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="ig"><label>ملاحظات</label><textarea id="e_notes" placeholder="أي ملاحظات..."></textarea></div>
     </div>
-    <div class="mf"><button class="btn-cancel" onclick="closeModal('editModal')">إلغاء</button><button class="btn-save" id="updateClientBtn" onclick="updateClient()" ontouchend="event.preventDefault();updateClient()">💾 حفظ التعديلات</button></div>
+    <div class="mf"><button class="btn-cancel" onclick="closeModal('editModal')">إلغاء</button><button class="btn-save" id="updateClientBtn" onclick="updateClient()">💾 حفظ التعديلات</button></div>
   </div>
 </div>
 
@@ -923,6 +923,8 @@ async function delClient(id){
 }
 
 function openAddModal(){
+  const btn=document.getElementById('saveClientBtn');
+  if(btn){btn.disabled=false;}
   ['f_company','f_address','f_notes'].forEach(id=>document.getElementById(id).value='');
   fContacts=[];renderContactsList('f');
   document.getElementById('f_industry').value='';
@@ -932,9 +934,6 @@ function openAddModal(){
 }
 
 async function saveClient(){
-  const btn=document.getElementById('saveClientBtn');
-  if(btn&&btn.disabled)return;
-  if(btn){btn.disabled=true;setTimeout(()=>btn.disabled=false,2000);}
   const company=document.getElementById('f_company').value.trim();
   const industry=document.getElementById('f_industry').value;
   const region=document.getElementById('f_region').value;
@@ -1080,6 +1079,8 @@ function importExcel(input){
 
 let editingId=null;
 function openEditModal(id){
+  const btn=document.getElementById('updateClientBtn');
+  if(btn){btn.disabled=false;}
   const c=clients.find(x=>x.id===id);if(!c)return;
   editingId=id;
   document.getElementById('e_company').value=c.company||'';
@@ -1099,9 +1100,6 @@ function openEditModal(id){
 }
 
 async function updateClient(){
-  const btn=document.getElementById('updateClientBtn');
-  if(btn&&btn.disabled)return;
-  if(btn){btn.disabled=true;setTimeout(()=>btn.disabled=false,2000);}
   const company=document.getElementById('e_company').value.trim();
   const industry=document.getElementById('e_industry').value;
   const region=document.getElementById('e_region').value;
