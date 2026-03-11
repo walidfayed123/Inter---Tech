@@ -208,6 +208,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
   .topbar-right{gap:6px;flex-wrap:wrap;}
   .topbar-right .btn-sec,.topbar-right .btn-add{padding:6px 10px;font-size:11px;}
   .page-title{font-size:13px;}
+  #mobileLogo{display:flex !important;}
   .sw input{width:100px;}
   .modal{width:95vw;max-height:90vh;overflow-y:auto;}
   .add-contact-row{grid-template-columns:1fr 1fr;gap:6px;}
@@ -219,8 +220,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
   .detail-modal{width:95vw;}
   .assign-bar{flex-wrap:wrap;gap:6px;padding:8px 12px;}
   .assign-bar button{font-size:11px;padding:6px 10px;}
-  #advSearchBar{gap:6px;}
-  #advSearchBar select{font-size:11px;padding:5px 8px;}
+  #advSearchBar{gap:6px;display:grid !important;grid-template-columns:1fr 1fr;}
+  #advSearchBar .view-tabs{grid-column:1/-1;margin-bottom:0;}
+  #advSearchBar select{font-size:12px;padding:8px 10px;width:100%;}
+  #advSearchBar .btn-sec{grid-column:1/-1;text-align:center;}
   .client-card{padding:14px;}
   .stats-grid{grid-template-columns:1fr 1fr;}
   .chart-card{padding:14px;}
@@ -291,7 +294,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 
   <main class="main">
     <div class="topbar">
-      <div class="page-title">قائمة <span>العملاء</span></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="mobileLogo" style="display:none;width:34px;height:34px;background:var(--red);border-radius:9px;align-items:center;justify-content:center;font-weight:900;font-size:12px;box-shadow:0 4px 12px var(--red-glow);flex-shrink:0">IT</div>
+        <div class="page-title">قائمة <span>العملاء</span></div>
+      </div>
       <div class="topbar-right">
         <div class="sw"><span style="color:var(--muted)">🔍</span><input type="text" id="searchInput" placeholder="ابحث..." oninput="renderClients()"></div>
         <button class="btn-sec" id="importBtn" style="display:none" onclick="openImportModal()">📥 استيراد Excel</button>
@@ -302,11 +308,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
     </div>
     <div class="content">
       <div id="clientsPage">
-        <div class="view-tabs">
-          <div class="view-tab active" onclick="setView('grid',this)">⊞ بطاقات</div>
-          <div class="view-tab" onclick="setView('list',this)">☰ قائمة</div>
-        </div>
         <div id="advSearchBar" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+          <div class="view-tabs" style="margin-bottom:0">
+            <div class="view-tab active" onclick="setView('grid',this)">⊞ بطاقات</div>
+            <div class="view-tab" onclick="setView('list',this)">☰ قائمة</div>
+          </div>
   <select id="asRegion" onchange="renderClients()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;">
     <option value="">🗺️ كل المناطق</option>
     <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option>
