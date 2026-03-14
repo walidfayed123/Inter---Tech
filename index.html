@@ -448,10 +448,19 @@ button{cursor:pointer;}
         </div>
         <div class="assign-bar" id="assignBar">
           <span class="sel-count" id="selCount">0 عميل محدد</span>
-          <select class="assign-select" id="assignTo"><option value="">اختر المندوب...</option></select>
+          <select class="assign-select" id="assignTo"><option value="">👤 اختر المندوب...</option></select>
           <button class="btn-primary" onclick="doAssign()">🎯 وزّع</button>
-          <button class="btn-danger" onclick="doDeleteSelected()">🗑️ حذف المحدد</button>
-          <button class="btn-secondary" style="margin-right:auto" onclick="selectAllFiltered()">☑️ تحديد الكل</button>
+          <select class="assign-select" id="bulkIndustry">
+            <option value="">🏭 غيّر القطاع...</option>
+            <option>Aviation</option><option>Cement &amp; Mining</option><option>Consultants</option><option>Contractors</option><option>Facilities HVAC</option><option>Fertilizers &amp; Chemicals</option><option>Food &amp; Pharmaceutical</option><option>General Industry</option><option>Heavy Equipment</option><option>Marine</option><option>Military</option><option>OEM</option><option>Oil &amp; Gas</option><option>Paper</option><option>Petrochemicals &amp; Refineries</option><option>Power Generation</option><option>Renewable Energy</option><option>Steel</option><option>Sugar</option><option>Water &amp; Waste Water</option>
+          </select>
+          <select class="assign-select" id="bulkRegion">
+            <option value="">🗺️ غيّر المنطقة...</option>
+            <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option><option>الدقهلية</option><option>البحر الأحمر</option><option>البحيرة</option><option>الفيوم</option><option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option><option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option><option>السويس</option><option>أسوان</option><option>أسيوط</option><option>بني سويف</option><option>بورسعيد</option><option>دمياط</option><option>الشرقية</option><option>جنوب سيناء</option><option>كفر الشيخ</option><option>مطروح</option><option>الأقصر</option><option>قنا</option><option>شمال سيناء</option><option>سوهاج</option><option>السادس من أكتوبر</option><option>العاشر من رمضان</option><option>أخرى</option>
+          </select>
+          <button class="btn-primary" style="background:var(--blue)" onclick="doBulkUpdate()">✏️ حدّث</button>
+          <button class="btn-danger" onclick="doDeleteSelected()">🗑️ حذف</button>
+          <button class="btn-secondary" onclick="selectAllFiltered()">☑️ الكل</button>
           <button class="btn-icon" onclick="toggleAssignMode()">✖️</button>
         </div>
         <div id="clientsContainer"></div>
@@ -991,6 +1000,25 @@ async function doAssign(){
     showToast(`✅ تم توزيع ${selectedClients.size} عميل`,'success');
     selectedClients.clear();toggleAssignMode();loadClients();
   }catch(e){showToast('❌ خطأ في التوزيع','error');}
+}
+
+async function doBulkUpdate(){
+  const industry=document.getElementById('bulkIndustry').value;
+  const region=document.getElementById('bulkRegion').value;
+  if(!industry&&!region){showToast('❌ اختر قطاع أو منطقة للتحديث','error');return;}
+  if(!selectedClients.size){showToast('❌ حدد عملاء أولاً','error');return;}
+  const updateData={};
+  if(industry)updateData.industry=industry;
+  if(region)updateData.region=region;
+  try{
+    for(const id of selectedClients){
+      await sb(`clients?id=eq.${id}`,{method:'PATCH',body:JSON.stringify(updateData)});
+    }
+    showToast(`✅ تم تحديث ${selectedClients.size} عميل`,'success');
+    document.getElementById('bulkIndustry').value='';
+    document.getElementById('bulkRegion').value='';
+    selectedClients.clear();toggleAssignMode();loadClients();
+  }catch(e){showToast('❌ خطأ في التحديث','error');}
 }
 
 async function doDeleteSelected(){
