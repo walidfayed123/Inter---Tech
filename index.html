@@ -725,8 +725,13 @@ async function doLogin(){
     if(!users.length){err.textContent='بيانات خاطئة أو الحساب موقف';btn.textContent='دخول ←';btn.disabled=false;return;}
     CU=users[0];
     sessionStorage.setItem('cu',JSON.stringify(CU));
+    btn.textContent='دخول ←';btn.disabled=false;
     startApp();
-  }catch(e){err.textContent='خطأ في الاتصال';btn.textContent='دخول ←';btn.disabled=false;}
+  }catch(e){
+    console.error('Login error:',e);
+    err.textContent='خطأ في الاتصال - تأكد من الإنترنت';
+    btn.textContent='دخول ←';btn.disabled=false;
+  }
 }
 
 function doLogout(){
@@ -747,6 +752,7 @@ function doLogout(){
 function startApp(){
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').style.display='flex';
+  document.getElementById('loginScreen').style.display='none';
   // Set user info
   document.getElementById('userAv').textContent=CU.name[0];
   document.getElementById('userName').textContent=CU.name;
