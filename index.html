@@ -766,7 +766,7 @@ async function doLogin(){
     const users=await sb(`users?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(pass)}&active=eq.true`);
     if(!users.length){err.textContent='بيانات خاطئة أو الحساب موقف';btn.textContent='دخول ←';btn.disabled=false;return;}
     CU=users[0];
-    sessionStorage.setItem('cu',JSON.stringify(CU));
+    localStorage.setItem('cu',JSON.stringify(CU));
     btn.textContent='دخول ←';btn.disabled=false;
     startApp();
   }catch(e){
@@ -777,7 +777,7 @@ async function doLogin(){
 }
 
 function doLogout(){
-  sessionStorage.removeItem('cu');
+  localStorage.removeItem('cu');
   CU=null;clients=[];
   document.getElementById('loginEmail').value='';
   document.getElementById('loginPass').value='';
@@ -822,7 +822,7 @@ function startApp(){
 
 // Auto-login from session
 window.addEventListener('load',()=>{
-  const saved=sessionStorage.getItem('cu');
+  const saved=localStorage.getItem('cu');
   if(saved){CU=JSON.parse(saved);startApp();}
 });
 
