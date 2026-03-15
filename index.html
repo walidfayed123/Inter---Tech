@@ -872,7 +872,8 @@ document.addEventListener('click',e=>{
 async function loadClients(){
   document.getElementById('clientsContainer').innerHTML='<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
   try{
-    let base=`clients?select=*,history(*)&order=created_at.desc`;
+    // Load clients without history first (faster)
+    let base=`clients?select=*&order=created_at.desc`;
     if(CU.role==='مندوب مبيعات')base+=`&assigned_to=eq.${encodeURIComponent(CU.id)}`;
     let all=[];let from=0;
     while(true){
@@ -884,10 +885,32 @@ async function loadClients(){
     clients=all;
     document.getElementById('clientsBadge').textContent=clients.length;
     renderClients();
+    // Load history in background
+    loadAllHistory();
   }catch(e){
     console.error(e);
     document.getElementById('clientsContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطأ في التحميل</p></div>';
   }
+}
+
+async function loadAllHistory(){
+  try{
+    let allH=[];let from=0;
+    while(true){
+      const page=await sb(`history?select=*&order=created_at.desc&limit=1000&offset=${from}`);
+      allH=allH.concat(page);
+      if(page.length<1000)break;
+      from+=1000;
+    }
+    // Attach history to clients
+    const hMap={};
+    allH.forEach(h=>{
+      if(!hMap[h.client_id])hMap[h.client_id]=[];
+      hMap[h.client_id].push(h);
+    });
+    clients=clients.map(c=>({...c,history:hMap[c.id]||[]}));
+    renderClients();
+  }catch(e){console.error('History load error:',e);}
 }
 
 async function loadRepsFilter(){
