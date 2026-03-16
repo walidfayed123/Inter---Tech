@@ -934,6 +934,9 @@ function clearFilters(){
   renderClients();
 }
 
+let visibleCount=50;
+const PAGE_SIZE=50;
+
 function renderClients(){
   const q=document.getElementById('searchInput').value.toLowerCase();
   const fReg=document.getElementById('filterRegion').value;
@@ -946,24 +949,50 @@ function renderClients(){
     const matchRep=!fRep||(c.assigned_to||'')===fRep;
     return matchQ&&matchReg&&matchInd&&matchRep;
   });
+  visibleCount=PAGE_SIZE;
+  renderVisible();
+}
+
+function renderVisible(){
   const con=document.getElementById('clientsContainer');
   if(!clients.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">🏭</div><p>لا يوجد عملاء بعد</p></div>';return;}
   if(!filteredClients.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>لا توجد نتائج</p></div>';return;}
+  const visible=filteredClients.slice(0,visibleCount);
+  const hasMore=filteredClients.length>visibleCount;
   if(currentView==='grid'){
     con.className='clients-grid';
-    con.innerHTML=filteredClients.map((c,i)=>renderCard(c,i)).join('');
+    con.innerHTML=visible.map((c,i)=>renderCard(c,i)).join('');
   }else{
     con.className='clients-list';
     con.innerHTML=`<div class="list-header"><div>الشركة</div><div class="list-cell-eng">المهندس</div><div class="list-cell-ind">القطاع</div><div class="list-cell-reg">المنطقة</div><div>تواصل</div></div>`+
-    filteredClients.map((c,i)=>renderListRow(c,i)).join('');
+    visible.map((c,i)=>renderListRow(c,i)).join('');
   }
+  // Add load more button
+  if(hasMore){
+    const more=document.createElement('div');
+    more.style.cssText='text-align:center;padding:20px;';
+    more.innerHTML=`<button class="btn-secondary" onclick="loadMore()" style="padding:10px 24px">
+      تحميل المزيد (${filteredClients.length-visibleCount} متبقي)
+    </button>`;
+    con.appendChild(more);
+  }
+  // Show count
+  const countEl=document.getElementById('clientsBadge');
+  if(countEl)countEl.textContent=clients.length;
+}
+
+function loadMore(){
+  visibleCount+=PAGE_SIZE;
+  renderVisible();
+  // Scroll to where we were
+  window.scrollBy(0,-100);
 }
 
 function setView(v,el){
   currentView=v;
   document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  renderClients();
+  renderVisible();
 }
 
 function renderCard(c,i){
